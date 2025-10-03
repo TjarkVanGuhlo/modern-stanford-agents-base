@@ -12,6 +12,14 @@ This repository is owned by the `TjarkVanGuhlo` GitHub account, but the local ma
 - SSH key for TjarkVanGuhlo account must already be configured in GitHub
 - SSH config should already be set up for the `github-tjark` host alias
 
+**Example SSH Config (`~/.ssh/config`):**
+```
+Host github-tjark
+    HostName github.com
+    User git
+    IdentityFile ~/.ssh/id_ed25519_tjark
+```
+
 ### Steps to Configure TjarkVanGuhlo Account
 
 1. **Add TjarkVanGuhlo Account to GitHub CLI**
@@ -46,7 +54,7 @@ This repository is owned by the `TjarkVanGuhlo` GitHub account, but the local ma
 
 Create a test release to verify everything works:
 ```bash
-gh release create v0.1.0 --title "Test Release" --notes "Test release notes"
+gh release create v0.1.1 --title "Test Release" --notes "Test release notes"
 ```
 
 ### Account Switching (If Needed)
