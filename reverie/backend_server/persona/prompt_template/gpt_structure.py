@@ -284,9 +284,7 @@ def safe_generate_response(prompt,
 def get_embedding(text, model=None):
   if model is None:
     model = MODEL_RETRIEVE_EMBEDDING
-  text = text.replace("\n", " ")
-  if not text:
-    text = "this is blank"
+  text = text.replace("\n", " ").strip() or "this is blank"
   return client.embeddings.create(
     input=[text], model=model).data[0].embedding
 
