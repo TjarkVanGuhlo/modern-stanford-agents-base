@@ -15,7 +15,7 @@ The codebase consists of two main servers that run concurrently:
 ### 1. Environment Server (Django)
 - **Location**: `environment/frontend_server/`
 - **Purpose**: Serves the visual map and handles frontend rendering
-- **Tech**: Django 2.2 project with SQLite database
+- **Tech**: Django 5.2.7+ project with SQLite database (modernized for Python 3.13)
 - **Storage**:
   - `storage/` - saved simulations
   - `compressed_storage/` - compressed demos for replay
@@ -47,52 +47,60 @@ Agents (called "personas" internally) have a cognitive architecture with several
 - `converse.py` - Handle agent-to-agent conversations
 
 **LLM Integration** (in `persona/prompt_template/`):
-- `run_gpt_prompt.py` - OpenAI API calls
-- `gpt_structure.py` - Prompt templates
+- `run_gpt_prompt.py` - High-level prompt execution functions
+- `gpt_structure.py` - OpenAI API wrapper functions (using OpenAI SDK v2.x)
 
 ## Development Setup
+
+### Project Structure
+This project uses **uv** for dependency management with Python 3.13+.
 
 ### Initial Configuration
 
 1. **Create `.env` file in project root**:
 ```bash
-OPENAI_API_KEY=your-api-key-here
+OPENAI_API_KEY=your_openai_api_key_here
 KEY_OWNER=Your Name
 ```
 
-2. **Optional: Configure cognitive models** (add to `.env`):
-```bash
-# Default models (used if not specified)
-MODEL_PERCEIVE=gpt-4o-mini
-MODEL_RETRIEVE_EMBEDDING=text-embedding-3-large
-MODEL_PLAN=gpt-4o
-MODEL_REFLECT=gpt-4o
-MODEL_EXECUTE=gpt-4o-mini
-MODEL_CONVERSE=gpt-4o
+The `utils.py` file loads these secrets automatically via `python-dotenv`.
 
-# Example: Use smaller embedding for cost savings
-MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small
+2. **Dependencies are managed via uv**:
+```bash
+# Dependencies already in pyproject.toml
+# uv automatically creates .venv and installs packages
 ```
 
-3. **Install dependencies**:
+Required Python: >=3.13
+
+### Configurable Cognitive Models
+
+The system supports configuring different LLM models for each cognitive function. Add to `.env`:
+
 ```bash
-uv sync
+MODEL_PERCEIVE=gpt-4o-mini          # Fast perception for frequent operations
+MODEL_RETRIEVE_EMBEDDING=text-embedding-3-large  # High-quality memory retrieval
+MODEL_PLAN=gpt-4o                   # Complex planning tasks
+MODEL_REFLECT=gpt-4o                # Deep reflection and insights
+MODEL_EXECUTE=gpt-4o-mini           # Fast execution for frequent operations
+MODEL_CONVERSE=gpt-4o               # Natural conversations between agents
 ```
-Requires Python 3.13+. Uses `uv` for dependency management.
+
+These models are loaded in `reverie/backend_server/utils.py` and used throughout the cognitive modules.
 
 ## Running the Simulation
 
 ### Start Environment Server
 ```bash
 cd environment/frontend_server
-python manage.py runserver
+uv run python manage.py runserver
 ```
 Verify at http://localhost:8000/ - should show "Your environment server is up and running"
 
 ### Start Simulation Server
 ```bash
 cd reverie/backend_server
-python reverie.py
+uv run python reverie.py
 ```
 
 When prompted for simulation names:
@@ -151,10 +159,21 @@ Speed: 1 (slowest) to 5 (fastest)
 - Memories have poignancy scores (importance) that affect retrieval
 - Retention period prevents re-perceiving same events
 
+## Modernization Notes
+
+This codebase has been modernized from the original Stanford research code:
+- **Python**: Upgraded from 3.9 to 3.13+
+- **Dependency Management**: Migrated from `requirements.txt` to `uv` and `pyproject.toml`
+- **Secrets Management**: Environment variables via `.env` file (using `python-dotenv`)
+- **OpenAI SDK**: Upgraded from v0.27.0 to v2.x with modern client pattern
+- **Django**: Updated from 2.2 to 5.2.7 (removed deprecated imports)
+- **Model Configuration**: LLMs configurable per cognitive function via environment variables
+
 ## Cost & API Considerations
 
-- OpenAI API can hang when hitting rate limits - save simulations frequently
-- Running simulations can be costly, especially with many agents (as of early 2023)
+- OpenAI API calls can be rate-limited - save simulations frequently
+- Running simulations can be costly, especially with many agents
+- Current implementation uses OpenAI chat.completions API with configurable models (default: gpt-4o and gpt-4o-mini)
 
 ## GitHub Configuration
 
