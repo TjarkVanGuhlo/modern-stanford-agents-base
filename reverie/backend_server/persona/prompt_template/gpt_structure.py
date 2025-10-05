@@ -13,6 +13,13 @@ from utils import *
 
 client = OpenAI(api_key=openai_api_key)
 
+# Import cognitive model configuration
+from utils import (
+    MODEL_PLAN,
+    MODEL_REFLECT,
+    MODEL_RETRIEVE_EMBEDDING
+)
+
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)
 
@@ -20,7 +27,7 @@ def ChatGPT_single_request(prompt):
   temp_sleep()
 
   completion = client.chat.completions.create(
-    model="gpt-3.5-turbo",
+    model=MODEL_PLAN,
     messages=[{"role": "user", "content": prompt}]
   )
   return completion.choices[0].message.content
@@ -46,7 +53,7 @@ def GPT4_request(prompt):
 
   try:
     completion = client.chat.completions.create(
-      model="gpt-4",
+      model=MODEL_REFLECT,
       messages=[{"role": "user", "content": prompt}]
     )
     return completion.choices[0].message.content
@@ -71,7 +78,7 @@ def ChatGPT_request(prompt):
   # temp_sleep()
   try:
     completion = client.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model=MODEL_PLAN,
       messages=[{"role": "user", "content": prompt}]
     )
     return completion.choices[0].message.content
@@ -274,7 +281,9 @@ def safe_generate_response(prompt,
   return fail_safe_response
 
 
-def get_embedding(text, model="text-embedding-ada-002"):
+def get_embedding(text, model=None):
+  if model is None:
+    model = MODEL_RETRIEVE_EMBEDDING
   text = text.replace("\n", " ")
   if not text:
     text = "this is blank"

@@ -54,27 +54,31 @@ Agents (called "personas" internally) have a cognitive architecture with several
 
 ### Initial Configuration
 
-1. **Create `utils.py` in `reverie/backend_server/`**:
-```python
-openai_api_key = "<Your OpenAI API>"
-key_owner = "<Name>"
-
-maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
-env_matrix = f"{maze_assets_loc}/the_ville/matrix"
-env_visuals = f"{maze_assets_loc}/the_ville/visuals"
-
-fs_storage = "../../environment/frontend_server/storage"
-fs_temp_storage = "../../environment/frontend_server/temp_storage"
-
-collision_block_id = "32125"
-debug = True
-```
-
-2. **Install dependencies**:
+1. **Create `.env` file in project root**:
 ```bash
-pip install -r requirements.txt
+OPENAI_API_KEY=your-api-key-here
+KEY_OWNER=Your Name
 ```
-Tested on Python 3.9.12. Consider using a virtualenv.
+
+2. **Optional: Configure cognitive models** (add to `.env`):
+```bash
+# Default models (used if not specified)
+MODEL_PERCEIVE=gpt-4o-mini
+MODEL_RETRIEVE_EMBEDDING=text-embedding-3-large
+MODEL_PLAN=gpt-4o
+MODEL_REFLECT=gpt-4o
+MODEL_EXECUTE=gpt-4o-mini
+MODEL_CONVERSE=gpt-4o
+
+# Example: Use smaller embedding for cost savings
+MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small
+```
+
+3. **Install dependencies**:
+```bash
+uv sync
+```
+Requires Python 3.13+. Uses `uv` for dependency management.
 
 ## Running the Simulation
 

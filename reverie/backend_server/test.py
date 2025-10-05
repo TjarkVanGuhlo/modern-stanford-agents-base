@@ -10,6 +10,9 @@ from utils import *
 
 client = OpenAI(api_key=openai_api_key)
 
+# Import cognitive model configuration
+from utils import MODEL_PLAN
+
 
 def ChatGPT_request(prompt):
     """
@@ -26,7 +29,7 @@ def ChatGPT_request(prompt):
     # temp_sleep()
     try:
         completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=MODEL_PLAN,
             messages=[{"role": "user", "content": prompt}]
         )
         return completion.choices[0].message.content
