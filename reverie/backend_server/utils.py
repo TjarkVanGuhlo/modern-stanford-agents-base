@@ -22,5 +22,14 @@ fs_temp_storage = "../../environment/frontend_server/temp_storage"
 
 collision_block_id = "32125"
 
+# Generative Agent Cognitive Models
+# Configure models for different cognitive functions (perceive, retrieve, plan, reflect, execute, converse)
+MODEL_PERCEIVE = os.getenv("MODEL_PERCEIVE", "gpt-4o-mini")
+MODEL_RETRIEVE_EMBEDDING = os.getenv("MODEL_RETRIEVE_EMBEDDING", "text-embedding-3-large")
+MODEL_PLAN = os.getenv("MODEL_PLAN", "gpt-4o")
+MODEL_REFLECT = os.getenv("MODEL_REFLECT", "gpt-4o")
+MODEL_EXECUTE = os.getenv("MODEL_EXECUTE", "gpt-4o-mini")
+MODEL_CONVERSE = os.getenv("MODEL_CONVERSE", "gpt-4o")
+
 # Verbose
 debug = True

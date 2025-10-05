@@ -15,7 +15,7 @@ The codebase consists of two main servers that run concurrently:
 ### 1. Environment Server (Django)
 - **Location**: `environment/frontend_server/`
 - **Purpose**: Serves the visual map and handles frontend rendering
-- **Tech**: Django 5.2.7 project with SQLite database (modernized for Python 3.13)
+- **Tech**: Django 2.2 project with SQLite database
 - **Storage**:
   - `storage/` - saved simulations
   - `compressed_storage/` - compressed demos for replay
@@ -47,45 +47,52 @@ Agents (called "personas" internally) have a cognitive architecture with several
 - `converse.py` - Handle agent-to-agent conversations
 
 **LLM Integration** (in `persona/prompt_template/`):
-- `run_gpt_prompt.py` - High-level prompt execution functions
-- `gpt_structure.py` - OpenAI API wrapper functions (using OpenAI SDK v2.x)
+- `run_gpt_prompt.py` - OpenAI API calls
+- `gpt_structure.py` - Prompt templates
 
 ## Development Setup
-
-### Project Structure
-This project uses **uv** for dependency management with Python 3.13+.
 
 ### Initial Configuration
 
 1. **Create `.env` file in project root**:
 ```bash
-OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_API_KEY=your-api-key-here
 KEY_OWNER=Your Name
 ```
 
-The `utils.py` file loads these secrets automatically via `python-dotenv`.
-
-2. **Dependencies are managed via uv**:
+2. **Optional: Configure cognitive models** (add to `.env`):
 ```bash
-# Dependencies already in pyproject.toml
-# uv automatically creates .venv and installs packages
+# Default models (used if not specified)
+MODEL_PERCEIVE=gpt-4o-mini
+MODEL_RETRIEVE_EMBEDDING=text-embedding-3-large
+MODEL_PLAN=gpt-4o
+MODEL_REFLECT=gpt-4o
+MODEL_EXECUTE=gpt-4o-mini
+MODEL_CONVERSE=gpt-4o
+
+# Example: Use smaller embedding for cost savings
+MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small
 ```
 
-Required Python: >=3.13
+3. **Install dependencies**:
+```bash
+uv sync
+```
+Requires Python 3.13+. Uses `uv` for dependency management.
 
 ## Running the Simulation
 
 ### Start Environment Server
 ```bash
 cd environment/frontend_server
-uv run python manage.py runserver
+python manage.py runserver
 ```
 Verify at http://localhost:8000/ - should show "Your environment server is up and running"
 
 ### Start Simulation Server
 ```bash
 cd reverie/backend_server
-uv run python reverie.py
+python reverie.py
 ```
 
 When prompted for simulation names:
@@ -144,20 +151,10 @@ Speed: 1 (slowest) to 5 (fastest)
 - Memories have poignancy scores (importance) that affect retrieval
 - Retention period prevents re-perceiving same events
 
-## Modernization Notes
-
-This codebase has been modernized from the original Stanford research code:
-- **Python**: Upgraded from 3.9 to 3.13+
-- **Dependency Management**: Migrated from `requirements.txt` to `uv` and `pyproject.toml`
-- **Secrets Management**: Environment variables via `.env` file (using `python-dotenv`)
-- **OpenAI SDK**: Upgraded from v0.27.0 to v2.x with modern client pattern
-- **Django**: Updated from 2.2 to 5.2.7 (removed deprecated imports)
-
 ## Cost & API Considerations
 
-- OpenAI API calls can be rate-limited - save simulations frequently
-- Running simulations can be costly, especially with many agents
-- Current implementation uses OpenAI chat.completions API with GPT-3.5-turbo and GPT-4
+- OpenAI API can hang when hitting rate limits - save simulations frequently
+- Running simulations can be costly, especially with many agents (as of early 2023)
 
 ## GitHub Configuration
 
