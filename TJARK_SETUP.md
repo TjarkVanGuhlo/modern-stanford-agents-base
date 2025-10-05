@@ -85,8 +85,63 @@ gh auth switch --hostname github.com
 - The workflow scope is specifically required for release operations
 - Each repository can have different GitHub accounts associated with it
 
+## 1Password SSH Agent Configuration
+
+### Problem Context
+
+When using 1Password SSH agent for managing SSH key passphrases, the SSH keys must be properly configured in both 1Password and the SSH agent config file. If the vault names don't match exactly, SSH will fall back to requesting passphrases in the terminal instead of using 1Password.
+
+### Prerequisites
+
+- 1Password SSH agent must be enabled in 1Password app (Settings → Developer → Use the SSH agent)
+- SSH_AUTH_SOCK environment variable must point to 1Password SSH agent
+- SSH keys must be stored in 1Password vaults
+
+### SSH Agent Configuration
+
+1. **Verify 1Password SSH Agent is Active**
+   ```bash
+   echo $SSH_AUTH_SOCK
+   # Should output: /Users/username/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
+   ```
+
+2. **Configure SSH Agent Config File**
+   Edit `~/.config/1Password/ssh/agent.toml` to include the correct vault names:
+   ```toml
+   [[ssh-keys]]
+   vault = "Tjark van Guhlo"  # Note: exact vault name with spaces
+   ```
+
+3. **Verify SSH Keys are Loaded**
+   ```bash
+   ssh-add -l
+   # Should show the tjark SSH key with fingerprint: SHA256:VpE7YgCEiFMNh0+vcrD7RvcMlxM47TCtRSFT+BkcW18
+   ```
+
+### Common Issues
+
+**SSH asks for passphrase in terminal instead of using 1Password:**
+- Check that vault name in `agent.toml` matches exactly (including spaces)
+- Verify the SSH key exists and is active in the specified 1Password vault
+- Ensure SSH_AUTH_SOCK points to 1Password agent socket
+- Kill any competing system SSH agents: `ps aux | grep ssh-agent`
+
+**SSH key not showing in `ssh-add -l`:**
+- Vault name mismatch in `agent.toml` (most common issue)
+- SSH key may be archived or deleted in 1Password
+- 1Password may need to be restarted after config changes
+
+### Testing 1Password SSH Integration
+
+```bash
+# Test SSH connection - should authenticate via 1Password, not terminal
+ssh -T git@github-tjark
+# Expected output: "Hi TjarkVanGuhlo! You've successfully authenticated..."
+```
+
 ## Security Considerations
 
 - Never skip SSH key configuration unless the key already exists
 - Always verify the active account before performing sensitive operations
 - Use proper SSH host aliases to separate different GitHub accounts
+- Ensure 1Password SSH agent config file uses exact vault names (case-sensitive, including spaces)
