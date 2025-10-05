@@ -5,7 +5,12 @@ load_dotenv()
 
 # OpenAI API Configuration (loaded from .env)
 openai_api_key = os.getenv("OPENAI_API_KEY")
+if not openai_api_key:
+    raise ValueError("OPENAI_API_KEY environment variable is required. Please set it in your .env file.")
+
 key_owner = os.getenv("KEY_OWNER")
+if not key_owner:
+    raise ValueError("KEY_OWNER environment variable is required. Please set it in your .env file.")
 
 # Path Configuration
 maze_assets_loc = "../../environment/frontend_server/static_dirs/assets"
