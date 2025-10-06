@@ -61,7 +61,20 @@ def test_gpt_structure_functions_use_configured_models(mock_env):
         assert result == [0.1, 0.2, 0.3]
 
 
-def test_model_preset_configuration():
+@pytest.fixture
+def clean_imports():
+    """Clean up imports before and after test."""
+    modules_to_clean = ['config', 'utils', 'gpt_structure']
+    # Clean before test
+    for module in modules_to_clean:
+        sys.modules.pop(module, None)
+    yield
+    # Clean after test
+    for module in modules_to_clean:
+        sys.modules.pop(module, None)
+
+
+def test_model_preset_configuration(clean_imports):
     """Test that MODEL_PRESET environment variable is respected on fresh import."""
     # This test verifies that if you start the application with MODEL_PRESET set,
     # it will use the correct preset. In production, you'd restart the server.
@@ -72,11 +85,6 @@ def test_model_preset_configuration():
         "KEY_OWNER": "test-owner",
         "MODEL_PRESET": "economy"
     }, clear=True):
-        # Clean any existing imports
-        for module in ['config', 'utils', 'gpt_structure']:
-            if module in sys.modules:
-                del sys.modules[module]
-
         # Now import with economy preset
         from config import model_config
 

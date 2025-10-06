@@ -68,11 +68,7 @@ class ModelConfig:
             config.EXECUTE = "gpt-4o-mini"
             config.CONVERSE = "gpt-4o-mini"
 
-        elif preset == "balanced":
-            # Default balanced configuration (already set)
-            pass
-
-        else:
+        elif preset != "balanced":
             raise ValueError(f"Unknown preset: {preset}. Available: performance, balanced, economy")
 
         return config
@@ -99,18 +95,15 @@ class ModelConfig:
         config = cls.from_preset(preset)
 
         # Override individual models if specified in environment
-        if os.getenv("MODEL_PERCEIVE"):
-            config.PERCEIVE = os.getenv("MODEL_PERCEIVE")
-        if os.getenv("MODEL_RETRIEVE_EMBEDDING"):
-            config.RETRIEVE_EMBEDDING = os.getenv("MODEL_RETRIEVE_EMBEDDING")
-        if os.getenv("MODEL_PLAN"):
-            config.PLAN = os.getenv("MODEL_PLAN")
-        if os.getenv("MODEL_REFLECT"):
-            config.REFLECT = os.getenv("MODEL_REFLECT")
-        if os.getenv("MODEL_EXECUTE"):
-            config.EXECUTE = os.getenv("MODEL_EXECUTE")
-        if os.getenv("MODEL_CONVERSE"):
-            config.CONVERSE = os.getenv("MODEL_CONVERSE")
+        model_attributes = [
+            "PERCEIVE", "RETRIEVE_EMBEDDING", "PLAN",
+            "REFLECT", "EXECUTE", "CONVERSE"
+        ]
+
+        for attr in model_attributes:
+            env_var = f"MODEL_{attr}"
+            if os.getenv(env_var):
+                setattr(config, attr, os.getenv(env_var))
 
         return config
 
@@ -123,6 +116,10 @@ class ModelConfig:
         Returns:
             Model name for the specified task
         """
+        # Handle None and empty string by defaulting to PLAN
+        if not task_type:
+            return self.PLAN
+
         task_map = {
             'perceive': self.PERCEIVE,
             'perception': self.PERCEIVE,

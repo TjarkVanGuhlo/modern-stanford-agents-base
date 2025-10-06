@@ -75,6 +75,14 @@ class TestModelConfig:
             assert config.PERCEIVE == "gpt-4o"
             assert config.EXECUTE == "gpt-4o"
 
+    def test_invalid_preset_env_var(self):
+        """Test that invalid MODEL_PRESET raises an error."""
+        from config import ModelConfig
+
+        with patch.dict(os.environ, {"MODEL_PRESET": "invalid_preset"}):
+            with pytest.raises(ValueError, match="Unknown preset"):
+                ModelConfig.from_env()
+
     def test_individual_env_override(self):
         """Test individual model override via environment variables."""
         from config import ModelConfig
@@ -109,6 +117,22 @@ class TestModelConfig:
 
         # Test default fallback
         assert config.get_model_for_task("unknown") == config.PLAN
+
+    def test_get_model_for_task_edge_cases(self):
+        """Test edge cases for get_model_for_task."""
+        from config import ModelConfig
+
+        config = ModelConfig()
+
+        # Test empty string - should default to PLAN
+        assert config.get_model_for_task("") == config.PLAN
+
+        # Test None - should default to PLAN
+        assert config.get_model_for_task(None) == config.PLAN
+
+        # Test case insensitivity
+        assert config.get_model_for_task("PERCEIVE") == config.PERCEIVE
+        assert config.get_model_for_task("PlAn") == config.PLAN
 
     def test_to_dict(self):
         """Test conversion to dictionary."""
@@ -181,20 +205,23 @@ class TestUtilsIntegration:
             assert isinstance(MODEL_RETRIEVE_EMBEDDING, str)
 
 
+@pytest.fixture
+def clean_modules():
+    """Clean up module imports for testing."""
+    modules = ['utils', 'gpt_structure', 'config']
+    for module in modules:
+        sys.modules.pop(module, None)
+    yield
+    for module in modules:
+        sys.modules.pop(module, None)
+
+
 class TestGPTStructureIntegration:
     """Test gpt_structure module integration."""
 
-    def test_gpt_structure_imports_all_models(self):
+    def test_gpt_structure_imports_all_models(self, clean_modules):
         """Test that gpt_structure imports all 6 cognitive models."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
-            import importlib
-            import sys
-
-            # Clean up any previous imports
-            if 'utils' in sys.modules:
-                del sys.modules['utils']
-            if 'gpt_structure' in sys.modules:
-                del sys.modules['gpt_structure']
 
             from gpt_structure import (
                 MODEL_PERCEIVE,
@@ -217,17 +244,9 @@ class TestGPTStructureIntegration:
             # Verify model_config is available
             assert model_config is not None
 
-    def test_gpt_functions_use_correct_models(self):
+    def test_gpt_functions_use_correct_models(self, clean_modules):
         """Test that GPT functions use the appropriate cognitive models."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
-            import importlib
-            import sys
-
-            # Clean up any previous imports
-            if 'utils' in sys.modules:
-                del sys.modules['utils']
-            if 'gpt_structure' in sys.modules:
-                del sys.modules['gpt_structure']
 
             from gpt_structure import MODEL_PLAN, MODEL_REFLECT, MODEL_RETRIEVE_EMBEDDING
             import gpt_structure
