@@ -26,7 +26,7 @@ from typing import Any
 
 from maze import *
 from persona.persona import *
-from reverie.backend_server.persona.cognitive_modules.converse import load_history_via_whisper
+from persona.cognitive_modules.converse import load_history_via_whisper
 
 
 ##############################################################################
