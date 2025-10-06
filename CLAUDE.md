@@ -50,12 +50,41 @@ Agents (called "personas" internally) have a cognitive architecture with several
 - `run_gpt_prompt.py` - High-level prompt execution functions
 - `gpt_structure.py` - OpenAI API wrapper functions (using OpenAI SDK v2.x)
 
-## Development Setup
+## Development Commands
 
-### Project Structure
-This project uses **uv** for dependency management with Python 3.13+.
+### Setup
+```bash
+# Install dependencies (auto-creates .venv)
+uv sync
 
-### Initial Configuration
+# Verify installation
+uv run python -c "import openai; print('Dependencies installed')"
+```
+
+### Running Tests
+```bash
+# Test OpenAI API connection
+cd reverie/backend_server
+uv run python test.py
+
+# Django tests (if any)
+cd environment/frontend_server
+uv run python manage.py test
+```
+
+### Development Workflow
+```bash
+# Add new dependency
+uv add <package-name>
+
+# Update all dependencies
+uv sync --upgrade
+
+# Run any Python script
+uv run python <script.py>
+```
+
+## Initial Configuration
 
 1. **Create `.env` file in project root**:
 ```bash
@@ -64,12 +93,6 @@ KEY_OWNER=Your Name
 ```
 
 The `utils.py` file loads these secrets automatically via `python-dotenv`.
-
-2. **Dependencies are managed via uv**:
-```bash
-# Dependencies already in pyproject.toml
-# uv automatically creates .venv and installs packages
-```
 
 Required Python: >=3.13
 
@@ -107,24 +130,19 @@ When prompted for simulation names:
 - **Fork simulation**: `base_the_ville_isabella_maria_klaus` (3 agents) or `base_the_ville_n25` (25 agents)
 - **New simulation name**: Choose any name (e.g., `test-simulation`)
 
-### Run Simulation Steps
+### Simulation Commands
 Navigate to http://localhost:8000/simulator_home
 
-At the `Enter option:` prompt, run:
-```bash
-run <step-count>
-```
-One game step = 10 seconds of game time.
+**Interactive Commands** (at the `Enter option:` prompt):
+- `run <step-count>` - Run simulation for N steps (1 step = 10 seconds game time)
+- `fin` - Save simulation and exit
+- `exit` - Exit without saving
+- `call -- load history the_ville/<file>.csv` - Load agent memories from CSV
 
-Save and exit: `fin`
-Exit without saving: `exit`
-
-### Load Agent History (Optional)
-To initialize agents with custom memories:
-```bash
-call -- load history the_ville/<history_file_name>.csv
-```
-Example files: `agent_history_init_n3.csv` or `agent_history_init_n25.csv` in `environment/frontend_server/static_dirs/assets/the_ville/`
+Example files for loading history:
+- `agent_history_init_n3.csv` (3-agent simulation)
+- `agent_history_init_n25.csv` (25-agent simulation)
+Located in: `environment/frontend_server/static_dirs/assets/the_ville/`
 
 ## Replay & Demo
 
@@ -134,9 +152,13 @@ http://localhost:8000/replay/<simulation-name>/<starting-time-step>/
 ```
 
 ### Demo (proper character sprites, must compress first)
-1. Compress simulation using `reverie/compress_sim_storage.py`
-2. Navigate to:
-```
+```bash
+# Compress simulation
+cd reverie
+uv run python compress_sim_storage.py
+# Edit the compress() function call with your simulation name
+
+# View demo
 http://localhost:8000/demo/<simulation-name>/<starting-time-step>/<speed>
 ```
 Speed: 1 (slowest) to 5 (fastest)
@@ -169,12 +191,39 @@ This codebase has been modernized from the original Stanford research code:
 - **Django**: Updated from 2.2 to 5.2.7 (removed deprecated imports)
 - **Model Configuration**: LLMs configurable per cognitive function via environment variables
 
+## Debugging & Troubleshooting
+
+### Common Issues
+
+**OpenAI API Errors**:
+- Check `.env` file exists and contains valid `OPENAI_API_KEY`
+- Verify API key permissions and rate limits
+- Test connection: `cd reverie/backend_server && uv run python test.py`
+
+**Django Server Issues**:
+- Database migrations: `cd environment/frontend_server && uv run python manage.py migrate`
+- Static files issues: Check `static_dirs/` permissions
+- Port conflicts: Ensure port 8000 is available
+
+**Simulation Freezes**:
+- API rate limits - save frequently with `fin` command
+- Memory issues with 25-agent simulations - use 3-agent base for testing
+
+### File Locations
+
+**Key Files**:
+- Agent state: `storage/<simulation-name>/personas/<agent-name>/`
+- World map data: `environment/frontend_server/static_dirs/assets/the_ville/matrix/`
+- Agent memories: JSON files in `storage/<simulation-name>/personas/*/memory/`
+- Simulation checkpoints: `storage/<simulation-name>/reverie/meta.json`
+
 ## Cost & API Considerations
 
 - OpenAI API calls can be rate-limited - save simulations frequently
 - Running simulations can be costly, especially with many agents
 - Current implementation uses OpenAI chat.completions API with configurable models (default: gpt-4o and gpt-4o-mini)
+- Estimate: ~$0.50-$2.00 per hour for 3-agent simulation, ~$5-10 per hour for 25 agents
 
 ## GitHub Configuration
 
-This repo uses the TjarkVanGuhlo GitHub account. See TJARK_SETUP.md for GitHub CLI authentication details.
+This repo uses the TjarkVanGuhlo GitHub account. See TJARK_SETUP.md for GitHub CLI authentication and 1Password SSH setup details.
