@@ -48,13 +48,13 @@ class ReverieServer:
         # copy everything that's in <fork_sim_code>, but edit its
         # reverie/meta/json's fork variable.
         self.sim_code = sim_code
-        sim_folder = f"{fs_storage}/{self.sim_code}"
-        copyanything(fork_folder, sim_folder)
+        self.sim_folder = f"{fs_storage}/{self.sim_code}"
+        copyanything(fork_folder, self.sim_folder)
 
-        with open(f"{sim_folder}/reverie/meta.json") as json_file:
+        with open(f"{self.sim_folder}/reverie/meta.json") as json_file:
             reverie_meta = json.load(json_file)
 
-        with open(f"{sim_folder}/reverie/meta.json", "w") as outfile:
+        with open(f"{self.sim_folder}/reverie/meta.json", "w") as outfile:
             reverie_meta["fork_sim_code"] = fork_sim_code
             outfile.write(json.dumps(reverie_meta, indent=2))
 
@@ -113,10 +113,10 @@ class ReverieServer:
         # self.persona_convo = dict()
 
         # Loading in all personas.
-        init_env_file = f"{sim_folder}/environment/{str(self.step)}.json"
+        init_env_file = f"{self.sim_folder}/environment/{str(self.step)}.json"
         init_env = json.load(open(init_env_file))
         for persona_name in reverie_meta['persona_names']:
-            persona_folder = f"{sim_folder}/personas/{persona_name}"
+            persona_folder = f"{self.sim_folder}/personas/{persona_name}"
             p_x = init_env[persona_name]["x"]
             p_y = init_env[persona_name]["y"]
             curr_persona = Persona(persona_name, persona_folder)
@@ -156,8 +156,6 @@ class ReverieServer:
           None
           * Saves all relevant data to the designated memory directory
         """
-        # <sim_folder> points to the current simulation folder.
-        sim_folder = f"{fs_storage}/{self.sim_code}"
 
         # Save Reverie meta-information.
         reverie_meta = {
@@ -169,13 +167,13 @@ class ReverieServer:
             "persona_names": list(self.personas.keys()),
             "step": self.step
         }
-        reverie_meta_f = f"{sim_folder}/reverie/meta.json"
+        reverie_meta_f = f"{self.sim_folder}/reverie/meta.json"
         with open(reverie_meta_f, "w") as outfile:
             outfile.write(json.dumps(reverie_meta, indent=2))
 
         # Save the personas.
         for persona_name, persona in self.personas.items():
-            save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"  # TODO: Check if save_folder is used
+            save_folder = f"{self.sim_folder}/personas/{persona_name}/bootstrap_memory"  # TODO: Check if save_folder is used
 
     def start_path_tester_server(self):
         """
@@ -273,8 +271,6 @@ class ReverieServer:
         OUTPUT
           None
         """
-        # <sim_folder> points to the current simulation folder.
-        sim_folder = f"{fs_storage}/{self.sim_code}"
 
         # When a persona arrives at a game object, we give a unique event
         # to that object.
@@ -288,7 +284,7 @@ class ReverieServer:
 
         # The main while loop of Reverie.
         while int_counter != 0:
-            curr_env_file = f"{sim_folder}/environment/{self.step}.json"
+            curr_env_file = f"{self.sim_folder}/environment/{self.step}.json"
             if check_if_file_exists(curr_env_file):
                 # If we have an environment file, it means we have a new perception
                 # input to our personas. So we first retrieve it.
@@ -369,7 +365,7 @@ class ReverieServer:
                     # {"persona": {"Maria Lopez": {"movement": [58, 9]}},
                     #  "persona": {"Klaus Mueller": {"movement": [38, 12]}},
                     #  "meta": {curr_time: <datetime>}}
-                    curr_move_file = f"{sim_folder}/movement/{self.step}.json"
+                    curr_move_file = f"{self.sim_folder}/movement/{self.step}.json"
                     with open(curr_move_file, "w") as outfile:
                         outfile.write(json.dumps(movements, indent=2))
 
@@ -398,9 +394,6 @@ class ReverieServer:
         print("clarify that these agents lack human-like agency, consciousness,")
         print("and independent decision-making.\n---")
 
-        # <sim_folder> points to the current simulation folder.
-        sim_folder = f"{fs_storage}/{self.sim_code}"
-
         while True:
             sim_command = input("Enter option: ")
             sim_command = sim_command.strip()
@@ -417,14 +410,14 @@ class ReverieServer:
                     # Starts the path tester and removes the currently forked sim files.
                     # Note that once you start this mode, you need to exit out of the
                     # session and restart in case you want to run something else.
-                    shutil.rmtree(sim_folder)
+                    shutil.rmtree(self.sim_folder)
                     self.start_path_tester_server()
 
                 elif sim_command.lower() == "exit":
                     # Finishes the simulation environment but does not save the progress
                     # and erases all saved data from current simulation.
                     # Example: exit
-                    shutil.rmtree(sim_folder)
+                    shutil.rmtree(self.sim_folder)
                     break
 
                 elif sim_command.lower() == "save":
