@@ -18,20 +18,43 @@ OPENAI_API_KEY=your-api-key-here
 KEY_OWNER=Your Name
 ```
 
-**Optional**: Configure models for different cognitive functions (perceive, retrieve, plan, reflect, execute, converse):
+### Model Configuration
 
-```bash
-# Default models (used if not specified)
-MODEL_PERCEIVE=gpt-4o-mini
-MODEL_RETRIEVE_EMBEDDING=text-embedding-3-large
-MODEL_PLAN=gpt-4o
-MODEL_REFLECT=gpt-4o
-MODEL_EXECUTE=gpt-4o-mini
-MODEL_CONVERSE=gpt-4o
+The system uses different language models for various cognitive functions based on the Generative Agents architecture. Models are configured in `reverie/backend_server/config.py` (not in .env, as they are configuration, not secrets).
 
-# Example: Use smaller embedding for cost savings
-MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small
-```
+#### Cognitive Functions and Default Models
+
+| Cognitive Function | Default Model | Purpose |
+|-------------------|---------------|----------|
+| **PERCEIVE** | gpt-4o-mini | Environment observation and perception |
+| **RETRIEVE_EMBEDDING** | text-embedding-3-large | Memory retrieval and similarity search |
+| **PLAN** | gpt-4o | Action planning and decision making |
+| **REFLECT** | gpt-4o | Memory synthesis and reflection generation |
+| **EXECUTE** | gpt-4o-mini | Action execution and task completion |
+| **CONVERSE** | gpt-4o | Dialogue and social interaction |
+
+#### Configuration Options
+
+1. **Use preset configurations** via environment variable:
+   ```bash
+   # High performance (all gpt-4o)
+   MODEL_PRESET=performance
+
+   # Balanced (default - mix of gpt-4o and gpt-4o-mini)
+   MODEL_PRESET=balanced
+
+   # Economy mode (mostly gpt-4o-mini)
+   MODEL_PRESET=economy
+   ```
+
+2. **Override individual models** via environment variables:
+   ```bash
+   MODEL_PRESET=balanced
+   MODEL_REFLECT=gpt-4o-mini  # Override just reflection model
+   MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small  # Use smaller embeddings
+   ```
+
+3. **Modify defaults** in `reverie/backend_server/config.py` for permanent changes.
 
 ### Step 2. Install Dependencies
 This project uses `uv` for dependency management. Tested on Python 3.13+.

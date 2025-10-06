@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# OpenAI API Configuration (loaded from .env)
+# OpenAI API Configuration (loaded from .env - these are actual secrets)
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY environment variable is required. Please set it in your .env file.")
@@ -22,14 +22,16 @@ fs_temp_storage = "../../environment/frontend_server/temp_storage"
 
 collision_block_id = "32125"
 
-# Generative Agent Cognitive Models
-# Configure models for different cognitive functions (perceive, retrieve, plan, reflect, execute, converse)
-MODEL_PERCEIVE = os.getenv("MODEL_PERCEIVE", "gpt-4o-mini")
-MODEL_RETRIEVE_EMBEDDING = os.getenv("MODEL_RETRIEVE_EMBEDDING", "text-embedding-3-large")
-MODEL_PLAN = os.getenv("MODEL_PLAN", "gpt-4o")
-MODEL_REFLECT = os.getenv("MODEL_REFLECT", "gpt-4o")
-MODEL_EXECUTE = os.getenv("MODEL_EXECUTE", "gpt-4o-mini")
-MODEL_CONVERSE = os.getenv("MODEL_CONVERSE", "gpt-4o")
+# Import cognitive models from config (these are configuration, not secrets)
+from config import (
+    MODEL_PERCEIVE,
+    MODEL_RETRIEVE_EMBEDDING,
+    MODEL_PLAN,
+    MODEL_REFLECT,
+    MODEL_EXECUTE,
+    MODEL_CONVERSE,
+    model_config
+)
 
 # Verbose
 debug = True
