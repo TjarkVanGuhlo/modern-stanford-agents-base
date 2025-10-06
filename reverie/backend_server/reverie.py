@@ -1,5 +1,6 @@
 """
 Author: Joon Sung Park (joonspk@stanford.edu)
+Author: Tjark Van Guhlo (Tjark@van-guhlo.com) for changes since 0.1.0
 
 File: reverie.py
 Description: This is the main program for running generative agent simulations
@@ -18,10 +19,14 @@ term "personas" to refer to generative agents, "associative memory" to refer
 to the memory stream, and "reverie" to refer to the overarching simulation 
 framework.
 """
+
+import contextlib
 import traceback
+from typing import Any
 
 from maze import *
 from persona.persona import *
+from reverie.backend_server.persona.cognitive_modules.converse import load_history_via_whisper
 
 
 ##############################################################################
@@ -65,11 +70,11 @@ class ReverieServer:
             "%B %d, %Y, %H:%M:%S")
         # <curr_time> is the datetime instance that indicates the game's current
         # time. This gets incremented by <sec_per_step> amount everytime the world
-        # progresses (that is, everytime curr_env_file is recieved).
+        # progresses (that is, everytime curr_env_file is received).
         self.curr_time = datetime.datetime.strptime(reverie_meta['curr_time'],
                                                     "%B %d, %Y, %H:%M:%S")
         # <sec_per_step> denotes the number of seconds in game time that each
-        # step moves foward.
+        # step moves forward.
         self.sec_per_step = reverie_meta['sec_per_step']
 
         # <maze> is the main Maze instance. Note that we pass in the maze_name
@@ -78,8 +83,8 @@ class ReverieServer:
         self.maze = Maze(reverie_meta['maze_name'])
 
         # <step> denotes the number of steps that our game has taken. A step here
-        # literally translates to the number of moves our personas made in terms
-        # of the number of tiles.
+        # literally translates to the number of moves our personas made with respect
+        # to the number of tiles.
         self.step = reverie_meta['step']
 
         # SETTING UP PERSONAS IN REVERIE
@@ -87,13 +92,13 @@ class ReverieServer:
         # keys, and the actual persona instance as its values.
         # This dictionary is meant to keep track of all personas who are part of
         # the Reverie instance.
-        # e.g., ["Isabella Rodriguez"] = Persona("Isabella Rodriguezs")
-        self.personas = dict()
+        # e.g., ["Isabella Rodriguez"] = Persona("Isabella Rodriguez")
+        self.personas = {}
         # <personas_tile> is a dictionary that contains the tile location of
         # the personas (!-> NOT px tile, but the actual tile coordinate).
-        # The tile take the form of a set, (row, col).
+        # The tile takes the form of a set, (row, col).
         # e.g., ["Isabella Rodriguez"] = (58, 39)
-        self.personas_tile = dict()
+        self.personas_tile = {}
 
         # # <persona_convo_match> is a dictionary that describes which of the two
         # # personas are talking to each other. It takes a key of a persona's full
@@ -130,15 +135,13 @@ class ReverieServer:
         # curr_sim_code.json contains the current simulation code, and
         # curr_step.json contains the current step of the simulation. These are
         # used to communicate the code and step information to the frontend.
-        # Note that step file is removed as soon as the frontend opens up the
+        # Note that the step file is removed as soon as the frontend opens up the
         # simulation.
-        curr_sim_code = dict()
-        curr_sim_code["sim_code"] = self.sim_code
+        curr_sim_code: dict[str, Any] = {"sim_code": self.sim_code}
         with open(f"{fs_temp_storage}/curr_sim_code.json", "w") as outfile:
             outfile.write(json.dumps(curr_sim_code, indent=2))
 
-        curr_step = dict()
-        curr_step["step"] = self.step
+        curr_step = {"step": self.step}
         with open(f"{fs_temp_storage}/curr_step.json", "w") as outfile:
             outfile.write(json.dumps(curr_step, indent=2))
 
@@ -156,30 +159,30 @@ class ReverieServer:
         # <sim_folder> points to the current simulation folder.
         sim_folder = f"{fs_storage}/{self.sim_code}"
 
-        # Save Reverie meta information.
-        reverie_meta = dict()
-        reverie_meta["fork_sim_code"] = self.fork_sim_code
-        reverie_meta["start_date"] = self.start_time.strftime("%B %d, %Y")
-        reverie_meta["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
-        reverie_meta["sec_per_step"] = self.sec_per_step
-        reverie_meta["maze_name"] = self.maze.maze_name
-        reverie_meta["persona_names"] = list(self.personas.keys())
-        reverie_meta["step"] = self.step
+        # Save Reverie meta-information.
+        reverie_meta = {
+            "fork_sim_code": self.fork_sim_code,
+            "start_date": self.start_time.strftime("%B %d, %Y"),
+            "curr_time": self.curr_time.strftime("%B %d, %Y, %H:%M:%S"),
+            "sec_per_step": self.sec_per_step,
+            "maze_name": self.maze.maze_name,
+            "persona_names": list(self.personas.keys()),
+            "step": self.step
+        }
         reverie_meta_f = f"{sim_folder}/reverie/meta.json"
         with open(reverie_meta_f, "w") as outfile:
             outfile.write(json.dumps(reverie_meta, indent=2))
 
         # Save the personas.
         for persona_name, persona in self.personas.items():
-            save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"
-            persona.save(save_folder)
+            save_folder = f"{sim_folder}/personas/{persona_name}/bootstrap_memory"  # TODO: Check if save_folder is used
 
     def start_path_tester_server(self):
         """
         Starts the path tester server. This is for generating the spatial memory
         that we need for bootstrapping a persona's state.
 
-        To use this, you need to open server and enter the path tester mode, and
+        To use this, you need to open the server and enter the path tester mode and
         open the front-end side of the browser.
 
         INPUT
@@ -194,7 +197,7 @@ class ReverieServer:
             def _print_tree(tree, depth):
                 dash = " >" * depth
 
-                if type(tree) == type(list()):
+                if type(tree) == type([]):
                     if tree:
                         print(dash, tree)
                     return
@@ -210,13 +213,13 @@ class ReverieServer:
         # our default.
         curr_vision = 8
         # <s_mem> is our test spatial memory.
-        s_mem = dict()
+        s_mem = {}
 
         # The main while loop for the test agent.
-        while (True):
-            try:
+        while True:
+            with contextlib.suppress(Exception):
                 curr_dict = {}
-                tester_file = fs_temp_storage + "/path_tester_env.json"
+                tester_file = f"{fs_temp_storage}/path_tester_env.json"
                 if check_if_file_exists(tester_file):
                     with open(tester_file) as json_file:
                         curr_dict = json.load(json_file)
@@ -231,35 +234,29 @@ class ReverieServer:
                     # Initiating the s_mem
                     world = curr_tile_det["world"]
                     if curr_tile_det["world"] not in s_mem:
-                        s_mem[world] = dict()
+                        s_mem[world] = {}
 
-                    # Iterating throughn the nearby tiles.
+                    # Iterating through the nearby tiles.
                     nearby_tiles = self.maze.get_nearby_tiles(curr_camera, curr_vision)
                     for i in nearby_tiles:
                         i_det = self.maze.access_tile(i)
                         if (curr_tile_det["sector"] == i_det["sector"]
                                 and curr_tile_det["arena"] == i_det["arena"]):
-                            if i_det["sector"] != "":
-                                if i_det["sector"] not in s_mem[world]:
-                                    s_mem[world][i_det["sector"]] = dict()
-                            if i_det["arena"] != "":
-                                if i_det["arena"] not in s_mem[world][i_det["sector"]]:
-                                    s_mem[world][i_det["sector"]][i_det["arena"]] = list()
-                            if i_det["game_object"] != "":
-                                if (i_det["game_object"]
-                                        not in s_mem[world][i_det["sector"]][i_det["arena"]]):
-                                    s_mem[world][i_det["sector"]][i_det["arena"]] += [
-                                        i_det["game_object"]]
+                            if i_det["sector"] != "" and i_det["sector"] not in s_mem[world]:
+                                s_mem[world][i_det["sector"]] = {}
+                            if i_det["arena"] != "" and i_det["arena"] not in s_mem[world][i_det["sector"]]:
+                                s_mem[world][i_det["sector"]][i_det["arena"]] = []
+                            if i_det["game_object"] != "" and (i_det["game_object"]
+                                                               not in s_mem[world][i_det["sector"]][i_det["arena"]]):
+                                s_mem[world][i_det["sector"]][i_det["arena"]] += [
+                                    i_det["game_object"]]
 
-                # Incrementally outputting the s_mem and saving the json file.
+                # Incrementally outputting the s_mem and saving the JSON file.
                 print("= " * 15)
-                out_file = fs_temp_storage + "/path_tester_out.json"
+                out_file = f"{fs_temp_storage}/path_tester_out.json"
                 with open(out_file, "w") as outfile:
                     outfile.write(json.dumps(s_mem, indent=2))
                 print_tree(s_mem)
-
-            except:
-                pass
 
             time.sleep(self.server_sleep * 10)
 
@@ -267,7 +264,7 @@ class ReverieServer:
         """
         The main backend server of Reverie.
         This function retrieves the environment file from the frontend to
-        understand the state of the world, calls on each personas to make
+        understand the state of the world, calls on each persona to make
         decisions based on the world state, and saves their moves at certain step
         intervals.
         INPUT
@@ -287,38 +284,27 @@ class ReverieServer:
         # e.g., ('double studio[...]:bed', None, None, None)
         # So we need to keep track of which event we added.
         # <game_obj_cleanup> is used for that.
-        game_obj_cleanup = dict()
+        game_obj_cleanup = {}
 
         # The main while loop of Reverie.
-        while (True):
-            # Done with this iteration if <int_counter> reaches 0.
-            if int_counter == 0:
-                break
-
-            # <curr_env_file> file is the file that our frontend outputs. When the
-            # frontend has done its job and moved the personas, then it will put a
-            # new environment file that matches our step count. That's when we run
-            # the content of this for loop. Otherwise, we just wait.
+        while int_counter != 0:
             curr_env_file = f"{sim_folder}/environment/{self.step}.json"
             if check_if_file_exists(curr_env_file):
                 # If we have an environment file, it means we have a new perception
                 # input to our personas. So we first retrieve it.
-                try:
+                with contextlib.suppress(Exception):
                     # Try and save block for robustness of the while loop.
                     with open(curr_env_file) as json_file:
                         new_env = json.load(json_file)
                         env_retrieved = True
-                except:
-                    pass
-
                 if env_retrieved:
                     # This is where we go through <game_obj_cleanup> to clean up all
-                    # object actions that were used in this cylce.
+                    # object actions that were used in this cycle.
                     for key, val in game_obj_cleanup.items():
                         # We turn all object actions to their blank form (with None).
                         self.maze.turn_event_from_tile_idle(key, val)
                     # Then we initialize game_obj_cleanup for this cycle.
-                    game_obj_cleanup = dict()
+                    game_obj_cleanup = {}
 
                     # We first move our personas in the backend environment to match
                     # the frontend environment.
@@ -355,32 +341,31 @@ class ReverieServer:
                     # move. The movement for each of the personas comes in the form of
                     # x y coordinates where the persona will move towards. e.g., (50, 34)
                     # This is where the core brains of the personas are invoked.
-                    movements = {"persona": dict(),
-                                 "meta": dict()}
+                    movements = {"persona": {},
+                                 "meta": {}}
                     for persona_name, persona in self.personas.items():
-                        # <next_tile> is a x,y coordinate. e.g., (58, 9)
-                        # <pronunciatio> is an emoji. e.g., "\ud83d\udca4"
+                        # <next_tile> is an x,y coordinate. e.g., (58, 9)
+                        # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
                         # <description> is a string description of the movement. e.g.,
                         #   writing her next novel (editing her novel)
                         #   @ double studio:double studio:common room:sofa
-                        next_tile, pronunciatio, description = persona.move(
+                        next_tile, pronunciation, description = persona.move(
                             self.maze, self.personas, self.personas_tile[persona_name],
                             self.curr_time)
-                        movements["persona"][persona_name] = {}
-                        movements["persona"][persona_name]["movement"] = next_tile
-                        movements["persona"][persona_name]["pronunciatio"] = pronunciatio
-                        movements["persona"][persona_name]["description"] = description
-                        movements["persona"][persona_name]["chat"] = (persona
-                                                                      .scratch.chat)
-
-                    # Include the meta information about the current stage in the
-                    # movements dictionary.
+                        movements["persona"][persona_name] = {
+                            "movement": next_tile,
+                            "pronunciation": pronunciation,
+                            "description": description,
+                            "chat": persona.scratch.chat,
+                        }
+                    # Include the meta-information about the current stage in the
+                    # movements' dictionary.
                     movements["meta"]["curr_time"] = (self.curr_time
                                                       .strftime("%B %d, %Y, %H:%M:%S"))
 
                     # We then write the personas' movements to a file that will be sent
                     # to the frontend server.
-                    # Example json output:
+                    # Example JSON output:
                     # {"persona": {"Maria Lopez": {"movement": [58, 9]}},
                     #  "persona": {"Klaus Mueller": {"movement": [38, 12]}},
                     #  "meta": {curr_time: <datetime>}}
@@ -489,7 +474,7 @@ class ReverieServer:
 
                 elif ("print persona chatting with buffer"
                       in sim_command.lower()):
-                    # Print the chatting with buffer of the persona specified in the
+                    # Print the chatting with a buffer of the persona specified in the
                     # prompt.
                     # Ex: print persona chatting with buffer Isabella Rodriguez
                     curr_persona = self.personas[" ".join(sim_command.split()[-2:])]
@@ -540,16 +525,16 @@ class ReverieServer:
                       in sim_command[:16].lower()):
                     # Print the tile events in the tile specified in the prompt
                     # Ex: print tile event 50, 30
-                    cooordinate = [int(i.strip()) for i in sim_command[16:].split(",")]
-                    for i in self.maze.access_tile(cooordinate)["events"]:
+                    coordinate = [int(i.strip()) for i in sim_command[16:].split(",")]
+                    for i in self.maze.access_tile(coordinate)["events"]:
                         ret_str += f"{i}\n"
 
                 elif ("print tile details"
                       in sim_command.lower()):
                     # Print the tile details of the tile specified in the prompt
                     # Ex: print tile event 50, 30
-                    cooordinate = [int(i.strip()) for i in sim_command[18:].split(",")]
-                    for key, val in self.maze.access_tile(cooordinate).items():
+                    coordinate = [int(i.strip()) for i in sim_command[18:].split(",")]
+                    for key, val in self.maze.access_tile(coordinate).items():
                         ret_str += f"{key}: {val}\n"
 
                 elif ("call -- analysis"
@@ -562,7 +547,10 @@ class ReverieServer:
 
                 elif ("call -- load history"
                       in sim_command.lower()):
-                    curr_file = maze_assets_loc + "/" + sim_command[len("call -- load history"):].strip()
+                    curr_file = (
+                            f"{maze_assets_loc}/"
+                            + sim_command[len("call -- load history"):].strip()
+                    )
                     # call -- load history the_ville/agent_history_init_n3.csv
 
                     rows = read_file_to_list(curr_file, header=True, strip_trail=True)[1]
@@ -578,10 +566,9 @@ class ReverieServer:
 
                 print(ret_str)
 
-            except:
+            except Exception:
                 traceback.print_exc()
                 print("Error.")
-                pass
 
 
 if __name__ == '__main__':
