@@ -15,9 +15,13 @@ client = OpenAI(api_key=openai_api_key)
 
 # Import cognitive model configuration
 from utils import (
+    MODEL_PERCEIVE,
+    MODEL_RETRIEVE_EMBEDDING,
     MODEL_PLAN,
     MODEL_REFLECT,
-    MODEL_RETRIEVE_EMBEDDING
+    MODEL_EXECUTE,
+    MODEL_CONVERSE,
+    model_config
 )
 
 def temp_sleep(seconds=0.1):
