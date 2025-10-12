@@ -97,7 +97,7 @@ When using 1Password SSH agent for managing SSH key passphrases, the SSH keys mu
 - SSH_AUTH_SOCK environment variable must point to 1Password SSH agent
 - SSH keys must be stored in 1Password vaults
 
-### SSH Agent Configuration
+### SSH Agent Configuration Steps
 
 1. **Verify 1Password SSH Agent is Active**
    ```bash
@@ -105,17 +105,41 @@ When using 1Password SSH agent for managing SSH key passphrases, the SSH keys mu
    # Should output: /Users/username/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
    ```
 
-2. **Configure SSH Agent Config File**
-   Edit `~/.config/1Password/ssh/agent.toml` to include the correct vault names:
-   ```toml
-   [[ssh-keys]]
-   vault = "Tjark van Guhlo"  # Note: exact vault name with spaces
-   ```
-
-3. **Verify SSH Keys are Loaded**
+2. **Check Current SSH Keys Loaded**
    ```bash
    ssh-add -l
-   # Should show the tjark SSH key with fingerprint: SHA256:VpE7YgCEiFMNh0+vcrD7RvcMlxM47TCtRSFT+BkcW18
+   # Look for the Tjark SSH key with fingerprint: SHA256:VpE7YgCEiFMNh0+vcrD7RvcMlxM47TCtRSFT+BkcW18
+   # If missing, proceed to step 3
+   ```
+
+3. **Add Tjark Vault to 1Password SSH Agent Config**
+
+   Edit `~/.config/1Password/ssh/agent.toml` and add the following entry:
+   ```toml
+   [[ssh-keys]]
+   vault = "Tjark van Guhlo"  # Note: exact vault name with spaces is critical
+   ```
+
+   **Full example config:**
+   ```toml
+   [[ssh-keys]]
+   vault = "Private"
+
+   [[ssh-keys]]
+   vault = "Tjark van Guhlo"
+   ```
+
+4. **Verify the Tjark SSH Key is Now Loaded**
+   ```bash
+   ssh-add -l | grep -i tjark
+   # Should show: 256 SHA256:VpE7YgCEiFMNh0+vcrD7RvcMlxM47TCtRSFT+BkcW18 tjark SSH (ED25519)
+   ```
+
+5. **Test SSH Connection to GitHub**
+   ```bash
+   ssh -T git@github-tjark
+   # Expected output: "Hi TjarkVanGuhlo! You've successfully authenticated..."
+   # Should NOT prompt for passphrase - 1Password handles it automatically
    ```
 
 ### Common Issues
