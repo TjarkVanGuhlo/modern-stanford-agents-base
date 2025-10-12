@@ -5,7 +5,7 @@ This document captures project-specific knowledge to speed up future development
 1) Build and configuration
 
 - Python and toolchain
-  - Python: requires >= 3.13 (pyproject). uv will create a local virtual environment automatically.
+  - Python: requires >= 3.14 (pyproject). uv will create a local virtual environment automatically.
   - Tooling: use uv for all dependency and execution tasks to ensure consistent resolution against latest versions within the specified ranges.
 
 - Initial setup
@@ -124,3 +124,33 @@ This document captures project-specific knowledge to speed up future development
 
 - Clean repository policy for examples
   - Any ad hoc example tests or scripts used for demonstration should be deleted after verification. Only persistent documentation should be added under .junie/.
+
+4) Versioning and releases
+
+- Tag style used in this repo
+  - Git tags use a leading "v" followed by semver version numbers. Examples: v0.1.8, v0.1.9, v0.1.10.
+  - Always keep tags and pyproject version in sync (version in pyproject.toml must match the release tag).
+
+- When to bump
+  - Patch (x.y.Z): documentation-only changes, internal refactors, minor fixes, CI/docs/guidelines updates.
+  - Minor (x.Y.z): backward-compatible features or improvements across the codebase.
+  - Major (X.y.z): breaking changes to runtime behavior or public APIs.
+
+- How to bump and release (using uv, git, and gh)
+  1. Update version in pyproject.toml (project.version) to the new value (e.g., 0.1.10). Ensure Python >=3.14 compatibility remains unchanged.  
+  2. Run tests locally to validate: `uv sync && uv run pytest -q`.  
+  3. Commit all modified files together (don’t forget docs like README.md and .junie/guidelines.md when they change):  
+     - `git add -A`  
+     - `git commit -m "chore(release): bump version to 0.1.10"`  
+  4. Create an annotated tag using the repo’s tag style (leading v):  
+     - `git tag -a v0.1.10 -m "Release v0.1.10"`  
+  5. Push branch and tags:  
+     - `git push`  
+     - `git push --tags`  
+  6. Create a GitHub release for the tag with gh (requires workflow scope; see TJARK_SETUP.md):  
+     - `gh release create v0.1.10 --title "v0.1.10" --notes "<highlights of changes>"`  
+
+- Notes
+  - The GitHub tag must match the version in pyproject.toml exactly, prefixed with "v".  
+  - See TJARK_SETUP.md for GitHub CLI multi-account setup and required scopes (repo, workflow).  
+  - If tests depend on environment defaults, set OPENAI_API_KEY and KEY_OWNER via patch.dict during tests or in a local .env when running servers.
