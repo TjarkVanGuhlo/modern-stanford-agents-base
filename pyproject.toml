@@ -1,15 +1,15 @@
 [project]
 name = "modern-stanford-agents-base"
-version = "0.1.10"
+version = "0.1.11"
 description = "Generative Agents: Interactive Simulacra of Human Behavior - Modernized for Python 3.14"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14.1"
 dependencies = [
-    "django>=5.2.8",
+    "django>=6.0",
     "django-cors-headers>=4.9.0",
     "django-storages>=1.14.6",
-    "numpy>=2.3.4",
-    "openai>=2.7.1",
+    "numpy>=2.3.5",
+    "openai>=2.9.0",
     "python-dotenv>=1.2.1",
     "selenium>=4.38.0",
 ]
