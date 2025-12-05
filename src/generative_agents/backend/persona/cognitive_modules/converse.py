@@ -2,21 +2,18 @@
 Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: converse.py
-Description: An extra cognitive module for generating conversations. 
+Description: An extra cognitive module for generating conversations.
 """
-import math
-import sys
 import datetime
+import math
 import random
-sys.path.append('../')
 
-from global_methods import *
-
-from persona.memory_structures.spatial_memory import *
-from persona.memory_structures.associative_memory import *
-from persona.memory_structures.scratch import *
-from persona.cognitive_modules.retrieve import *
-from persona.prompt_template.run_gpt_prompt import *
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.memory_structures.spatial_memory import *
+from generative_agents.backend.persona.memory_structures.associative_memory import *
+from generative_agents.backend.persona.memory_structures.scratch import *
+from generative_agents.backend.persona.cognitive_modules.retrieve import *
+from generative_agents.backend.persona.prompt_template.run_gpt_prompt import *
 
 def generate_agent_chat_summarize_ideas(init_persona, 
                                         target_persona, 

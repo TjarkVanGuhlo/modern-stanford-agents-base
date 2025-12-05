@@ -5,16 +5,13 @@ File: run_gpt_prompt.py
 Description: Defines all run gpt prompt functions. These functions directly
 interface with the safe_generate_response function.
 """
-import re
-import datetime
-import sys
 import ast
+import datetime
+import re
 
-sys.path.append('../../')
-
-from global_methods import *
-from persona.prompt_template.gpt_structure import *
-from persona.prompt_template.print_prompt import *
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.prompt_template.gpt_structure import *
+from generative_agents.backend.persona.prompt_template.print_prompt import *
 
 def get_random_alphanumeric(i=6, j=6): 
   """

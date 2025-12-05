@@ -2,16 +2,13 @@
 Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: retrieve.py
-Description: This defines the "Retrieve" module for generative agents. 
+Description: This defines the "Retrieve" module for generative agents.
 """
-import sys
-sys.path.append('../../')
-
-from global_methods import *
-from persona.prompt_template.gpt_structure import *
-
 from numpy import dot
 from numpy.linalg import norm
+
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.prompt_template.gpt_structure import *
 
 def retrieve(persona, perceived): 
   """

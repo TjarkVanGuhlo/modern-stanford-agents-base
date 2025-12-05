@@ -2,30 +2,28 @@
 Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: persona.py
-Description: Defines the Persona class that powers the agents in Reverie. 
+Description: Defines the Persona class that powers the agents in Reverie.
 
 Note (May 1, 2023) -- this is effectively GenerativeAgent class. Persona was
-the term we used internally back in 2022, taking from our Social Simulacra 
+the term we used internally back in 2022, taking from our Social Simulacra
 paper.
 """
-import math
-import sys
 import datetime
+import math
 import random
-sys.path.append('../')
 
-from global_methods import *
+from generative_agents.backend.global_methods import *
 
-from persona.memory_structures.spatial_memory import *
-from persona.memory_structures.associative_memory import *
-from persona.memory_structures.scratch import *
+from generative_agents.backend.persona.memory_structures.spatial_memory import *
+from generative_agents.backend.persona.memory_structures.associative_memory import *
+from generative_agents.backend.persona.memory_structures.scratch import *
 
-from persona.cognitive_modules.perceive import *
-from persona.cognitive_modules.retrieve import *
-from persona.cognitive_modules.plan import *
-from persona.cognitive_modules.reflect import *
-from persona.cognitive_modules.execute import *
-from persona.cognitive_modules.converse import *
+from generative_agents.backend.persona.cognitive_modules.perceive import *
+from generative_agents.backend.persona.cognitive_modules.retrieve import *
+from generative_agents.backend.persona.cognitive_modules.plan import *
+from generative_agents.backend.persona.cognitive_modules.reflect import *
+from generative_agents.backend.persona.cognitive_modules.execute import *
+from generative_agents.backend.persona.cognitive_modules.converse import *
 
 class Persona: 
   def __init__(self, name, folder_mem_saved=False):
