@@ -4,17 +4,15 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 File: print_prompt.py
 Description: For printing prompts when the setting for verbose is set to True.
 """
-import sys
-sys.path.append('../')
-
-import json
-import numpy
 import datetime
+import json
 import random
 
-from global_methods import *
-from persona.prompt_template.gpt_structure import *
-from utils import *
+import numpy
+
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.prompt_template.gpt_structure import *
+from generative_agents.backend.utils import *
 
 ##############################################################################
 #                    PERSONA Chapter 1: Prompt Structures                    #

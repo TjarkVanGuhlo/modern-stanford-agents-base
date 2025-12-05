@@ -24,9 +24,9 @@ import contextlib
 import traceback
 from typing import Any
 
-from maze import *
-from persona.persona import *
-from persona.cognitive_modules.converse import load_history_via_whisper
+from generative_agents.backend.maze import *
+from generative_agents.backend.persona.persona import *
+from generative_agents.backend.persona.cognitive_modules.converse import load_history_via_whisper
 
 
 ##############################################################################
@@ -564,15 +564,14 @@ class ReverieServer:
                 print("Error.")
 
 
-if __name__ == '__main__':
-    # rs = ReverieServer("base_the_ville_isabella_maria_klaus",
-    #                    "July1_the_ville_isabella_maria_klaus-step-3-1")
-    # rs = ReverieServer("July1_the_ville_isabella_maria_klaus-step-3-20",
-    #                    "July1_the_ville_isabella_maria_klaus-step-3-21")
-    # rs.open_server()
-
+def main():
+    """Entry point for the generative-agents CLI command."""
     origin = input("Enter the name of the forked simulation: ").strip()
     target = input("Enter the name of the new simulation: ").strip()
 
     rs = ReverieServer(origin, target)
     rs.open_server()
+
+
+if __name__ == "__main__":
+    main()

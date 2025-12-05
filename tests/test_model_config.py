@@ -5,17 +5,13 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock
 
-# Add paths for imports
-sys.path.insert(0, 'reverie/backend_server')
-sys.path.insert(0, 'reverie/backend_server/persona/prompt_template')
-
 
 class TestModelConfig:
     """Test ModelConfig class functionality."""
 
     def test_default_configuration(self):
         """Test that default configuration loads with balanced preset."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig()
         assert config.PERCEIVE == "gpt-4o-mini"
@@ -27,7 +23,7 @@ class TestModelConfig:
 
     def test_performance_preset(self):
         """Test performance preset uses all high-end models."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig.from_preset("performance")
         assert config.PERCEIVE == "gpt-4o"
@@ -39,7 +35,7 @@ class TestModelConfig:
 
     def test_economy_preset(self):
         """Test economy preset uses cost-optimized models."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig.from_preset("economy")
         assert config.PERCEIVE == "gpt-4o-mini"
@@ -51,7 +47,7 @@ class TestModelConfig:
 
     def test_balanced_preset(self):
         """Test balanced preset (default configuration)."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig.from_preset("balanced")
         assert config.PERCEIVE == "gpt-4o-mini"
@@ -61,14 +57,14 @@ class TestModelConfig:
 
     def test_invalid_preset_raises_error(self):
         """Test that invalid preset name raises ValueError."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         with pytest.raises(ValueError, match="Unknown preset"):
             ModelConfig.from_preset("invalid_preset")
 
     def test_env_preset_override(self):
         """Test loading configuration from MODEL_PRESET env var."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         with patch.dict(os.environ, {"MODEL_PRESET": "performance"}):
             config = ModelConfig.from_env()
@@ -77,7 +73,7 @@ class TestModelConfig:
 
     def test_invalid_preset_env_var(self):
         """Test that invalid MODEL_PRESET raises an error."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         with patch.dict(os.environ, {"MODEL_PRESET": "invalid_preset"}):
             with pytest.raises(ValueError, match="Unknown preset"):
@@ -85,7 +81,7 @@ class TestModelConfig:
 
     def test_individual_env_override(self):
         """Test individual model override via environment variables."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         env_vars = {
             "MODEL_PRESET": "economy",
@@ -101,7 +97,7 @@ class TestModelConfig:
 
     def test_get_model_for_task(self):
         """Test task-to-model mapping."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig()
 
@@ -120,7 +116,7 @@ class TestModelConfig:
 
     def test_get_model_for_task_edge_cases(self):
         """Test edge cases for get_model_for_task."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig()
 
@@ -136,7 +132,7 @@ class TestModelConfig:
 
     def test_to_dict(self):
         """Test conversion to dictionary."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig()
         config_dict = config.to_dict()
@@ -149,7 +145,7 @@ class TestModelConfig:
 
     def test_string_representation(self):
         """Test string representation of config."""
-        from config import ModelConfig
+        from generative_agents.backend.config import ModelConfig
 
         config = ModelConfig()
         str_repr = str(config)
@@ -168,10 +164,10 @@ class TestUtilsIntegration:
         # Mock the required environment variables
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
             import importlib
-            import utils
+            import generative_agents.backend.utils as utils
             importlib.reload(utils)
 
-            from utils import (
+            from generative_agents.backend.utils import (
                 MODEL_PERCEIVE,
                 MODEL_RETRIEVE_EMBEDDING,
                 MODEL_PLAN,
@@ -194,10 +190,10 @@ class TestUtilsIntegration:
         """Test backward compatibility with existing code."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
             import importlib
-            import utils
+            import generative_agents.backend.utils as utils
             importlib.reload(utils)
 
-            from utils import MODEL_PLAN, MODEL_REFLECT, MODEL_RETRIEVE_EMBEDDING
+            from generative_agents.backend.utils import MODEL_PLAN, MODEL_REFLECT, MODEL_RETRIEVE_EMBEDDING
 
             # These should still be strings (model names)
             assert isinstance(MODEL_PLAN, str)
@@ -208,7 +204,11 @@ class TestUtilsIntegration:
 @pytest.fixture
 def clean_modules():
     """Clean up module imports for testing."""
-    modules = ['utils', 'gpt_structure', 'config']
+    modules = [
+        'generative_agents.backend.utils',
+        'generative_agents.backend.persona.prompt_template.gpt_structure',
+        'generative_agents.backend.config',
+    ]
     for module in modules:
         sys.modules.pop(module, None)
     yield
@@ -223,7 +223,7 @@ class TestGPTStructureIntegration:
         """Test that gpt_structure imports all 6 cognitive models."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
 
-            from gpt_structure import (
+            from generative_agents.backend.persona.prompt_template.gpt_structure import (
                 MODEL_PERCEIVE,
                 MODEL_RETRIEVE_EMBEDDING,
                 MODEL_PLAN,
@@ -248,8 +248,12 @@ class TestGPTStructureIntegration:
         """Test that GPT functions use the appropriate cognitive models."""
         with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}):
 
-            from gpt_structure import MODEL_PLAN, MODEL_REFLECT, MODEL_RETRIEVE_EMBEDDING
-            import gpt_structure
+            from generative_agents.backend.persona.prompt_template.gpt_structure import (
+                MODEL_PLAN,
+                MODEL_REFLECT,
+                MODEL_RETRIEVE_EMBEDDING,
+            )
+            import generative_agents.backend.persona.prompt_template.gpt_structure as gpt_structure
 
             # Check that functions reference the correct models
             # This verifies the models are available for use in the functions
@@ -280,10 +284,10 @@ class TestEnvironmentOverrides:
         with patch.dict(os.environ, env_vars, clear=False):
             # Need to reimport to get fresh config with env vars
             import importlib
-            import config
+            import generative_agents.backend.config as config
             importlib.reload(config)
 
-            from config import model_config
+            from generative_agents.backend.config import model_config
 
             assert model_config.PLAN == "custom-plan-model"
             assert model_config.REFLECT == "custom-reflect-model"
@@ -296,10 +300,10 @@ class TestEnvironmentOverrides:
         """Test partial override leaves other models unchanged."""
         with patch.dict(os.environ, {"MODEL_PLAN": "gpt-3.5-turbo"}):
             import importlib
-            import config
+            import generative_agents.backend.config as config
             importlib.reload(config)
 
-            from config import model_config
+            from generative_agents.backend.config import model_config
 
             assert model_config.PLAN == "gpt-3.5-turbo"
             assert model_config.REFLECT == "gpt-4o"  # Unchanged from default

@@ -5,15 +5,12 @@ File: associative_memory.py
 Description: Defines the core long-term memory module for generative agents.
 
 Note (May 1, 2023) -- this class is the Memory Stream module in the generative
-agents paper. 
+agents paper.
 """
-import sys
-sys.path.append('../../')
-
-import json
 import datetime
+import json
 
-from global_methods import *
+from generative_agents.backend.global_methods import *
 
 
 class ConceptNode: 

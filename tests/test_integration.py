@@ -5,10 +5,6 @@ import sys
 import pytest
 from unittest.mock import patch, MagicMock
 
-# Add paths for imports
-sys.path.insert(0, 'reverie/backend_server')
-sys.path.insert(0, 'reverie/backend_server/persona/prompt_template')
-
 
 @pytest.fixture
 def mock_env():
@@ -22,11 +18,17 @@ def mock_env():
 
 def test_gpt_structure_functions_use_configured_models(mock_env):
     """Test that GPT functions actually use the configured models."""
-    from gpt_structure import ChatGPT_request, GPT4_request, get_embedding
-    from gpt_structure import MODEL_PLAN, MODEL_REFLECT, MODEL_RETRIEVE_EMBEDDING
+    from generative_agents.backend.persona.prompt_template.gpt_structure import (
+        ChatGPT_request,
+        GPT4_request,
+        get_embedding,
+        MODEL_PLAN,
+        MODEL_REFLECT,
+        MODEL_RETRIEVE_EMBEDDING,
+    )
 
     # Mock the OpenAI client
-    with patch('gpt_structure.client') as mock_client:
+    with patch('generative_agents.backend.persona.prompt_template.gpt_structure.client') as mock_client:
         # Setup mock responses
         mock_completion = MagicMock()
         mock_completion.choices = [MagicMock(message=MagicMock(content="test response"))]
@@ -64,7 +66,11 @@ def test_gpt_structure_functions_use_configured_models(mock_env):
 @pytest.fixture
 def clean_imports():
     """Clean up imports before and after test."""
-    modules_to_clean = ['config', 'utils', 'gpt_structure']
+    modules_to_clean = [
+        'generative_agents.backend.config',
+        'generative_agents.backend.utils',
+        'generative_agents.backend.persona.prompt_template.gpt_structure',
+    ]
     # Clean before test
     for module in modules_to_clean:
         sys.modules.pop(module, None)
@@ -86,7 +92,7 @@ def test_model_preset_configuration(clean_imports):
         "MODEL_PRESET": "economy"
     }, clear=True):
         # Now import with economy preset
-        from config import model_config
+        from generative_agents.backend.config import model_config
 
         # Verify economy models are loaded
         assert model_config.PLAN == "gpt-4o-mini"  # Economy uses gpt-4o-mini for planning

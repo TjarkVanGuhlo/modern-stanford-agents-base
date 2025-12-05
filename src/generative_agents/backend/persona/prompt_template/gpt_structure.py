@@ -6,23 +6,22 @@ Description: Wrapper functions for calling OpenAI APIs.
 """
 import json
 import random
-from openai import OpenAI
 import time
 
-from utils import *
+from openai import OpenAI
 
-client = OpenAI(api_key=openai_api_key)
-
-# Import cognitive model configuration
-from utils import (
+from generative_agents.backend.utils import (
+    openai_api_key,
     MODEL_PERCEIVE,
     MODEL_RETRIEVE_EMBEDDING,
     MODEL_PLAN,
     MODEL_REFLECT,
     MODEL_EXECUTE,
     MODEL_CONVERSE,
-    model_config
+    model_config,
 )
+
+client = OpenAI(api_key=openai_api_key)
 
 def temp_sleep(seconds=0.1):
   time.sleep(seconds)

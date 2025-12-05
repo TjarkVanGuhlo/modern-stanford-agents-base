@@ -3,17 +3,18 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: maze.py
 Description: Defines the Maze class, which represents the map of the simulated
-world in a 2-dimensional matrix. 
+world in a 2-dimensional matrix.
 """
-import json
-import numpy
 import datetime
+import json
+import math
 import pickle
 import time
-import math
 
-from global_methods import *
-from utils import *
+import numpy
+
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.utils import *
 
 class Maze: 
   def __init__(self, maze_name): 

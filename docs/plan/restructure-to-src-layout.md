@@ -1,8 +1,20 @@
 # Project Restructuring Plan: Migrate to src/ Layout
 
+**STATUS: COMPLETED**
+
 ## Overview
 
 This document outlines the plan to restructure the project from its current flat layout to a proper Python `src/` layout with installable packages.
+
+## Completion Summary
+
+The restructuring has been completed successfully:
+
+- All 20 tests pass
+- Package is installable via `uv sync`
+- CLI entry point `generative-agents` works
+- Old `reverie/` directory has been removed
+- CLAUDE.md documentation updated
 
 ## Current State Analysis
 

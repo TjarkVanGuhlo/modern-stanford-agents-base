@@ -2,19 +2,17 @@
 Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: plan.py
-Description: This defines the "Plan" module for generative agents. 
+Description: This defines the "Plan" module for generative agents.
 """
 import datetime
 import math
-import random 
-import sys
+import random
 import time
-sys.path.append('../../')
 
-from global_methods import *
-from persona.prompt_template.run_gpt_prompt import *
-from persona.cognitive_modules.retrieve import *
-from persona.cognitive_modules.converse import *
+from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.prompt_template.run_gpt_prompt import *
+from generative_agents.backend.persona.cognitive_modules.retrieve import *
+from generative_agents.backend.persona.cognitive_modules.converse import *
 
 ##############################################################################
 # CHAPTER 2: Generate

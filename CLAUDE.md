@@ -6,6 +6,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a modernized Python 3.14.1+ implementation of "Generative Agents: Interactive Simulacra of Human Behavior" (Park et al., 2023). The system simulates believable human behaviors using LLM-powered agents that perceive, remember, plan, reflect, and interact in a 2D virtual world called Smallville.
 
+## Project Structure
+
+```
+modern-stanford-agents-base/
+├── src/
+│   └── generative_agents/           # Main installable package
+│       ├── __init__.py
+│       ├── compress.py              # Simulation compression utility
+│       └── backend/                 # Core simulation engine
+│           ├── server.py            # Main simulation orchestrator (entry point)
+│           ├── config.py            # Model configuration
+│           ├── utils.py             # Path handling and utilities
+│           ├── maze.py              # World representation
+│           ├── path_finder.py       # A* pathfinding
+│           ├── global_methods.py    # Shared utility functions
+│           └── persona/             # Agent implementation
+│               ├── persona.py       # Main agent class
+│               ├── cognitive_modules/   # Perceive, Plan, Reflect, etc.
+│               ├── memory_structures/   # Associative, Spatial, Scratch
+│               └── prompt_template/     # LLM interface
+├── environment/
+│   └── frontend_server/             # Django web interface
+├── tests/                           # Test suite
+├── docs/plan/                       # Implementation plans
+└── pyproject.toml                   # Package configuration
+```
+
 ## Common Commands
 
 ### Development Setup
@@ -47,8 +74,11 @@ Visit http://localhost:8000/ to verify it's running.
 
 **Start Backend Simulation Server:**
 ```bash
-cd reverie/backend_server
-uv run python reverie.py
+# Option 1: Using the CLI entry point
+uv run generative-agents
+
+# Option 2: Using Python module directly
+uv run python -m generative_agents.backend.server
 ```
 Follow the prompts to load a base simulation (e.g., `base_the_ville_isabella_maria_klaus`) and name your new simulation.
 
@@ -72,31 +102,31 @@ exit    # Exit without saving (deletes current simulation)
 
 The system implements a perceive-retrieve-plan-reflect-execute cycle for each agent at every time step:
 
-1. **Perceive** (`persona/cognitive_modules/perceive.py`): Agent observes nearby events within vision radius, filtered by attention bandwidth and retention
-2. **Retrieve** (`persona/cognitive_modules/retrieve.py`): Queries associative memory using embeddings to find relevant past events and thoughts
-3. **Plan** (`persona/cognitive_modules/plan.py`): Generates long-term (daily schedule) and short-term (immediate action) plans based on retrieved context
-4. **Reflect** (`persona/cognitive_modules/reflect.py`): Synthesizes memories into higher-level thoughts when importance threshold is reached
-5. **Execute** (`persona/cognitive_modules/execute.py`): Converts plans into concrete actions (object usage, tile movement)
-6. **Converse** (`persona/cognitive_modules/converse.py`): Handles agent-to-agent dialogue and social interaction
+1. **Perceive** (`backend/persona/cognitive_modules/perceive.py`): Agent observes nearby events within vision radius, filtered by attention bandwidth and retention
+2. **Retrieve** (`backend/persona/cognitive_modules/retrieve.py`): Queries associative memory using embeddings to find relevant past events and thoughts
+3. **Plan** (`backend/persona/cognitive_modules/plan.py`): Generates long-term (daily schedule) and short-term (immediate action) plans based on retrieved context
+4. **Reflect** (`backend/persona/cognitive_modules/reflect.py`): Synthesizes memories into higher-level thoughts when importance threshold is reached
+5. **Execute** (`backend/persona/cognitive_modules/execute.py`): Converts plans into concrete actions (object usage, tile movement)
+6. **Converse** (`backend/persona/cognitive_modules/converse.py`): Handles agent-to-agent dialogue and social interaction
 
 ### Key Components
 
-**Persona** (`reverie/backend_server/persona/persona.py`):
+**Persona** (`src/generative_agents/backend/persona/persona.py`):
 - The main agent class (internally called "Persona", publicly "GenerativeAgent")
 - Integrates three memory types: spatial (world layout), associative (event stream), and scratch (short-term working memory)
 - Each agent has configurable `att_bandwidth` (attention capacity) and `retention` (memory recency threshold)
 
 **Memory Structures**:
-- **AssociativeMemory** (`persona/memory_structures/associative_memory.py`): The "memory stream" from the paper. Stores ConceptNodes with embeddings, keywords, poignancy scores, and decay functions. Three types: events, thoughts, chats
-- **SpatialMemory** (`persona/memory_structures/spatial_memory.py`): Hierarchical tree of world→sector→arena→game objects
-- **Scratch** (`persona/memory_structures/scratch.py`): Transient state including current action, planned path, daily schedule
+- **AssociativeMemory** (`backend/persona/memory_structures/associative_memory.py`): The "memory stream" from the paper. Stores ConceptNodes with embeddings, keywords, poignancy scores, and decay functions. Three types: events, thoughts, chats
+- **SpatialMemory** (`backend/persona/memory_structures/spatial_memory.py`): Hierarchical tree of world->sector->arena->game objects
+- **Scratch** (`backend/persona/memory_structures/scratch.py`): Transient state including current action, planned path, daily schedule
 
-**Maze** (`reverie/backend_server/maze.py`):
+**Maze** (`src/generative_agents/backend/maze.py`):
 - 2D tile-based world representation loaded from Tiled map exports
 - Each tile contains: world/sector/arena/game_object addresses, collision state, active events
 - Handles pathfinding via `path_finder.py` using collision detection
 
-**ReverieServer** (`reverie/backend_server/reverie.py`):
+**ReverieServer** (`src/generative_agents/backend/server.py`):
 - Main simulation orchestrator
 - Synchronizes frontend (Django) and backend (agent logic)
 - Manages time progression (default: 10 seconds per step)
@@ -104,7 +134,7 @@ The system implements a perceive-retrieve-plan-reflect-execute cycle for each ag
 
 ### Model Configuration
 
-Models are configured in `reverie/backend_server/config.py` via the `ModelConfig` class, **not** in .env (they are configuration choices, not secrets).
+Models are configured in `src/generative_agents/backend/config.py` via the `ModelConfig` class, **not** in .env (they are configuration choices, not secrets).
 
 **Cognitive Functions and Models**:
 | Function | Default Model | Purpose |
@@ -139,12 +169,9 @@ Configuration is read at import time. In tests, ensure clean imports by clearing
 ## Testing Conventions
 
 - Tests use `pytest` from the `dev` dependency group
-- Many tests prepend `sys.path` to import backend modules directly:
-  ```python
-  sys.path.insert(0, 'reverie/backend_server')
-  ```
-- Mock all OpenAI calls by patching `gpt_structure.client`
-- When testing config changes, clear affected modules from `sys.modules` before re-importing (`['config', 'utils', 'gpt_structure']`)
+- Import from the installed package: `from generative_agents.backend.config import ModelConfig`
+- Mock all OpenAI calls by patching `generative_agents.backend.persona.prompt_template.gpt_structure.client`
+- When testing config changes, clear affected modules from `sys.modules` before re-importing
 - Set `OPENAI_API_KEY` and `KEY_OWNER` via `patch.dict(os.environ)` to avoid host environment dependencies
 
 ## Important Patterns
@@ -188,7 +215,7 @@ MODEL_PERCEIVE=gpt-4o-mini
 
 ## Debugging Commands
 
-The backend server (`reverie.py`) provides an interactive REPL with commands:
+The backend server provides an interactive REPL with commands:
 
 ```
 print persona schedule <name>              # Show decomposed daily schedule

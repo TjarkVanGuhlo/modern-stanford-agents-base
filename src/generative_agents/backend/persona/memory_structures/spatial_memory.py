@@ -3,14 +3,12 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 
 File: spatial_memory.py
 Description: Defines the MemoryTree class that serves as the agents' spatial
-memory that aids in grounding their behavior in the game world. 
+memory that aids in grounding their behavior in the game world.
 """
 import json
-import sys
-sys.path.append('../../')
 
-from utils import *
-from global_methods import *
+from generative_agents.backend.utils import *
+from generative_agents.backend.global_methods import *
 
 class MemoryTree: 
   def __init__(self, f_saved): 
