@@ -53,9 +53,7 @@ def normalize_and_select(output: str, accessible: list[str], fail_safe: str) -> 
 
     if normalized_output in normalized_map:
         return normalized_map[normalized_output]
-    if accessible:
-        return random.choice(accessible)
-    return fail_safe
+    return random.choice(accessible) if accessible else fail_safe
 
 
 ##############################################################################
