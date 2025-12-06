@@ -25,8 +25,31 @@ packages = ["src/generative_agents"]
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4.2",
+    "pytest>=9.0.1",
     "sourcery>=1.41.1",
     "ty>=0.0.1a32",
     "vulture>=2.14",
+]
+
+[tool.vulture]
+min_confidence = 80
+exclude = [
+    "*/migrations/*",
+    "*/settings/*",
+]
+ignore_names = [
+    # TypedDict fields (used dynamically)
+    "game_object",
+    "spawning_location",
+    "collision",
+    "events",
+    # Public API methods used in tests or intended for external use
+    "get_model_for_task",
+    "to_dict",
+    # Scratch accessor methods (public API for persona introspection)
+    "get_str_*",
+    "get_curr_*",
+    "act_*",
+    # Module-level config exports
+    "MODEL_*",
 ]
