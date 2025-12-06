@@ -178,6 +178,9 @@ def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=Fa
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
+    # Ensure output is a list (fail_safe returns list, __func_clean_up returns list)
+    if isinstance(output, str):
+        output = [output]
     output = [
         f"wake up and complete the morning routine at {wake_up_hour}:00 am"
     ] + output
@@ -439,14 +442,14 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
             for i in range(total_expected_min - len(curr_min_slot)):
                 curr_min_slot += [last_task]
 
-        cr_ret = [
+        cr_ret: list[list[str | int]] = [
             ["dummy", -1],
         ]
         for task, task_index in curr_min_slot:
             if task != cr_ret[-1][0]:
                 cr_ret += [[task, 1]]
             else:
-                cr_ret[-1][1] += 1
+                cr_ret[-1][1] = int(cr_ret[-1][1]) + 1
         cr = cr_ret[1:]
 
         return cr
@@ -500,10 +503,11 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
     # print (prompt)
     print(output)
 
-    fin_output = []
+    # Output is list of [task_str, duration_int] pairs from __func_clean_up
+    fin_output: list[list[str | int]] = []
     time_sum = 0
     for i_task, i_duration in output:
-        time_sum += i_duration
+        time_sum += int(i_duration)
         # HM?????????
         # if time_sum < duration:
         if time_sum <= duration:
@@ -512,10 +516,11 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
             break
     ftime_sum = 0
     for fi_task, fi_duration in fin_output:
-        ftime_sum += fi_duration
+        ftime_sum += int(fi_duration)
 
     # print ("for debugging... line 365", fin_output)
-    fin_output[-1][1] += duration - ftime_sum
+    if fin_output:
+        fin_output[-1][1] = int(fin_output[-1][1]) + (duration - ftime_sum)
     output = fin_output
 
     task_decomp = output

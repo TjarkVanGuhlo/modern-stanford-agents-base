@@ -562,14 +562,16 @@ class ReverieServer:
                 elif "print tile event" in sim_command[:16].lower():
                     # Print the tile events in the tile specified in the prompt
                     # Ex: print tile event 50, 30
-                    coordinate = [int(i.strip()) for i in sim_command[16:].split(",")]
+                    coords = [int(i.strip()) for i in sim_command[16:].split(",")]
+                    coordinate = (coords[0], coords[1])
                     for i in self.maze.access_tile(coordinate)["events"]:
                         ret_str += f"{i}\n"
 
                 elif "print tile details" in sim_command.lower():
                     # Print the tile details of the tile specified in the prompt
                     # Ex: print tile event 50, 30
-                    coordinate = [int(i.strip()) for i in sim_command[18:].split(",")]
+                    coords = [int(i.strip()) for i in sim_command[18:].split(",")]
+                    coordinate = (coords[0], coords[1])
                     for key, val in self.maze.access_tile(coordinate).items():
                         ret_str += f"{key}: {val}\n"
 

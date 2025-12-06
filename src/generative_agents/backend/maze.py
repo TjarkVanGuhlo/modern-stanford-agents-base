@@ -8,9 +8,22 @@ world in a 2-dimensional matrix.
 
 import json
 import math
+from typing import TypedDict
 
 from generative_agents.backend.global_methods import read_file_to_list
 from generative_agents.backend.utils import env_matrix
+
+
+class TileDetails(TypedDict):
+    """Type definition for tile detail dictionaries in the maze."""
+
+    world: str
+    sector: str
+    arena: str
+    game_object: str
+    spawning_location: str
+    collision: bool
+    events: set[tuple[str | None, ...]]
 
 
 class Maze:
@@ -126,37 +139,19 @@ class Maze:
         #         'collision': False,
         #         'events': {('double studio:double studio:bedroom 2:bed',
         #                    None, None)}}
-        self.tiles = []
+        self.tiles: list[list[TileDetails]] = []
         for i in range(self.maze_height):
-            row = []
+            row: list[TileDetails] = []
             for j in range(self.maze_width):
-                tile_details = {}
-                tile_details["world"] = wb
-
-                tile_details["sector"] = ""
-                if sector_maze[i][j] in sb_dict:
-                    tile_details["sector"] = sb_dict[sector_maze[i][j]]
-
-                tile_details["arena"] = ""
-                if arena_maze[i][j] in ab_dict:
-                    tile_details["arena"] = ab_dict[arena_maze[i][j]]
-
-                tile_details["game_object"] = ""
-                if game_object_maze[i][j] in gob_dict:
-                    tile_details["game_object"] = gob_dict[game_object_maze[i][j]]
-
-                tile_details["spawning_location"] = ""
-                if spawning_location_maze[i][j] in slb_dict:
-                    tile_details["spawning_location"] = slb_dict[
-                        spawning_location_maze[i][j]
-                    ]
-
-                tile_details["collision"] = False
-                if self.collision_maze[i][j] != "0":
-                    tile_details["collision"] = True
-
-                tile_details["events"] = set()
-
+                tile_details: TileDetails = {
+                    "world": wb,
+                    "sector": sb_dict.get(sector_maze[i][j], ""),
+                    "arena": ab_dict.get(arena_maze[i][j], ""),
+                    "game_object": gob_dict.get(game_object_maze[i][j], ""),
+                    "spawning_location": slb_dict.get(spawning_location_maze[i][j], ""),
+                    "collision": self.collision_maze[i][j] != "0",
+                    "events": set(),
+                }
                 row += [tile_details]
             self.tiles += [row]
         # Each game object occupies an event in the tile. We are setting up the
@@ -229,7 +224,7 @@ class Maze:
         y = math.ceil(px_coordinate[1] / self.sq_tile_size)
         return (x, y)
 
-    def access_tile(self, tile):
+    def access_tile(self, tile: tuple[int, int]) -> TileDetails:
         """
         Returns the tiles details dictionary that is stored in self.tiles of the
         designated x, y location.
@@ -251,7 +246,7 @@ class Maze:
         y = tile[1]
         return self.tiles[y][x]
 
-    def get_tile_path(self, tile, level):
+    def get_tile_path(self, tile: tuple[int, int], level: str) -> str:
         """
         Get the tile string address given its coordinate. You designate the level
         by giving it a string level description.
@@ -267,23 +262,20 @@ class Maze:
         """
         x = tile[0]
         y = tile[1]
-        tile = self.tiles[y][x]
+        tile_details = self.tiles[y][x]
 
-        path = f"{tile['world']}"
+        path = tile_details["world"]
         if level == "world":
             return path
-        else:
-            path += f":{tile['sector']}"
+        path += f":{tile_details['sector']}"
 
         if level == "sector":
             return path
-        else:
-            path += f":{tile['arena']}"
+        path += f":{tile_details['arena']}"
 
         if level == "arena":
             return path
-        else:
-            path += f":{tile['game_object']}"
+        path += f":{tile_details['game_object']}"
 
         return path
 
