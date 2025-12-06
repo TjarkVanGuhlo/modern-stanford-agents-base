@@ -151,8 +151,6 @@ def execute(persona, maze, personas, plan):
         ret = persona.scratch.planned_path[0]
         persona.scratch.planned_path = persona.scratch.planned_path[1:]
 
-    description = f"{persona.scratch.act_description}"
-    description += f" @ {persona.scratch.act_address}"
+    description = f"{persona.scratch.act_description} @ {persona.scratch.act_address}"
 
-    execution = ret, persona.scratch.act_pronunciatio, description
-    return execution
+    return ret, persona.scratch.act_pronunciatio, description

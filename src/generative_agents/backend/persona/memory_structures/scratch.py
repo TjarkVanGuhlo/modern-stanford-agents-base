@@ -256,13 +256,12 @@ class Scratch:
             "vision_r": self.vision_r,
             "att_bandwidth": self.att_bandwidth,
             "retention": self.retention,
+            "curr_time": self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+            if self.curr_time
+            else "",
+            "curr_tile": self.curr_tile,
+            "daily_plan_req": self.daily_plan_req,
         }
-
-        scratch["curr_time"] = (
-            self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else ""
-        )
-        scratch["curr_tile"] = self.curr_tile
-        scratch["daily_plan_req"] = self.daily_plan_req
 
         scratch["name"] = self.name
         scratch["first_name"] = self.first_name

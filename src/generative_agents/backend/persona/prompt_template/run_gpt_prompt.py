@@ -594,11 +594,9 @@ def run_gpt_prompt_action_sector(
         return cleaned_response
 
     def __func_validate(gpt_response, prompt=""):
-        if len(gpt_response.strip()) < 1:
+        if not gpt_response.strip():
             return False
-        if "}" not in gpt_response:
-            return False
-        return "," not in gpt_response
+        return "}" in gpt_response and "," not in gpt_response
 
     def get_fail_safe():
         fs = "kitchen"
@@ -726,11 +724,9 @@ def run_gpt_prompt_action_arena(
         return cleaned_response
 
     def __func_validate(gpt_response, prompt=""):
-        if len(gpt_response.strip()) < 1:
+        if not gpt_response.strip():
             return False
-        if "}" not in gpt_response:
-            return False
-        return "," not in gpt_response
+        return "}" in gpt_response and "," not in gpt_response
 
     def get_fail_safe():
         fs = "kitchen"
