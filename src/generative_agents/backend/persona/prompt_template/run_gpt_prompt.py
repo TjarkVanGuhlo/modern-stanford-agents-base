@@ -40,6 +40,22 @@ def get_random_alphanumeric(i=6, j=6):
     return "".join(random.choices(string.ascii_letters + string.digits, k=k))
 
 
+def normalize_and_select(output: str, accessible: list[str], fail_safe: str) -> str:
+    """
+    Normalize GPT output against accessible options with case-insensitive matching.
+
+    Trims and lowercases both the output and accessible options for comparison,
+    returning the original-cased accessible value on match. Falls back to a random
+    accessible option if available, otherwise returns the fail_safe.
+    """
+    normalized_output = output.strip().lower()
+    normalized_map = {item.lower(): item for item in accessible}
+
+    if normalized_output in normalized_map:
+        return normalized_map[normalized_output]
+    return random.choice(accessible) if accessible else fail_safe
+
+
 ##############################################################################
 # CHAPTER 1: Run GPT Prompt
 ##############################################################################
@@ -728,9 +744,12 @@ def run_gpt_prompt_action_arena(
             return False
         return "}" in gpt_response and "," not in gpt_response
 
-    def get_fail_safe():
-        fs = "kitchen"
-        return fs
+    def get_accessible_arenas():
+        sector_key = f"{act_world}:{act_sector}"
+        accessible = persona.s_mem.get_str_accessible_sector_arenas(sector_key)
+        if not accessible:
+            return []
+        return [s for s in (i.strip() for i in accessible.split(",")) if s]
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -748,15 +767,12 @@ def run_gpt_prompt_action_arena(
     )
     prompt = generate_prompt(prompt_input, prompt_template)
 
-    fail_safe = get_fail_safe()
+    accessible_arenas = get_accessible_arenas()
+    fail_safe = accessible_arenas[0] if accessible_arenas else "main room"
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
-    print(output)
-    # y = f"{act_world}:{act_sector}"
-    # x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(",")]
-    # if output not in x:
-    #   output = random.choice(x)
+    output = normalize_and_select(output, accessible_arenas, fail_safe)
 
     if debug or verbose:
         print_run_prompts(
@@ -787,9 +803,11 @@ def run_gpt_prompt_action_game_object(
         cleaned_response = gpt_response.strip()
         return cleaned_response
 
-    def get_fail_safe():
-        fs = "bed"
-        return fs
+    def get_accessible_game_objects():
+        accessible = persona.s_mem.get_str_accessible_arena_game_objects(temp_address)
+        if not accessible:
+            return []
+        return [s for s in (i.strip() for i in accessible.split(",")) if s]
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -807,19 +825,12 @@ def run_gpt_prompt_action_game_object(
     )
     prompt = generate_prompt(prompt_input, prompt_template)
 
-    fail_safe = get_fail_safe()
+    accessible_objects = get_accessible_game_objects()
+    fail_safe = accessible_objects[0] if accessible_objects else "bed"
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
-
-    x = [
-        i.strip()
-        for i in persona.s_mem.get_str_accessible_arena_game_objects(
-            temp_address
-        ).split(",")
-    ]
-    if output not in x:
-        output = random.choice(x)
+    output = normalize_and_select(output, accessible_objects, fail_safe)
 
     if debug or verbose:
         print_run_prompts(
