@@ -221,7 +221,7 @@ KEY_OWNER=Your Name
 Optional model configuration (see Model Configuration section above):
 ```bash
 MODEL_PRESET=balanced|performance|economy
-MODEL_PERCEIVE=gpt-4o-mini
+MODEL_PERCEIVE=gpt-5-mini
 # ... etc for other cognitive functions
 ```
 
