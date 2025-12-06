@@ -29,8 +29,7 @@ def get_random_alphanumeric(i=6, j=6):
       an alpha numeric str with the length of somewhere between i and j.
     """
     k = random.randint(i, j)
-    x = "".join(random.choices(string.ascii_letters + string.digits, k=k))
-    return x
+    return "".join(random.choices(string.ascii_letters + string.digits, k=k))
 
 
 ##############################################################################
@@ -66,7 +65,7 @@ def run_gpt_prompt_wake_up_hour(persona, test_input=None, verbose=False):
     def __func_validate(gpt_response, prompt=""):
         try:
             __func_clean_up(gpt_response, prompt="")
-        except:
+        except Exception:
             return False
         return True
 
@@ -132,14 +131,14 @@ def run_gpt_prompt_daily_plan(persona, wake_up_hour, test_input=None, verbose=Fa
         for i in _cr:
             if i[-1].isdigit():
                 i = i[:-1].strip()
-                if i[-1] == "." or i[-1] == ",":
+                if i[-1] in [".", ","]:
                     cr += [i[:-1].strip()]
         return cr
 
     def __func_validate(gpt_response, prompt=""):
         try:
             __func_clean_up(gpt_response, prompt="")
-        except:
+        except Exception:
             return False
         return True
 
@@ -240,10 +239,7 @@ def run_gpt_prompt_generate_hourly_schedule(
 
         prompt_input += [prior_schedule + "\n"]
         prompt_input += [intermission_str]
-        if intermission2:
-            prompt_input += [intermission2]
-        else:
-            prompt_input += [""]
+        prompt_input += [intermission2] if intermission2 else [""]
         prompt_input += [prompt_ending]
 
         return prompt_input
@@ -257,7 +253,7 @@ def run_gpt_prompt_generate_hourly_schedule(
     def __func_validate(gpt_response, prompt=""):
         try:
             __func_clean_up(gpt_response, prompt="")
-        except:
+        except Exception:
             return False
         return True
 
@@ -374,7 +370,7 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
                 summ_str += f"{start_time_str} ~ {end_time_str}, {persona.name} is planning on {persona.scratch.f_daily_schedule_hourly_org[index][0]}, "
                 if curr_f_org_index + 1 == index:
                     curr_time_range = f"{start_time_str} ~ {end_time_str}"
-        summ_str = summ_str[:-2] + "."
+        summ_str = f"{summ_str[:-2]}."
 
         prompt_input = []
         prompt_input += [persona.scratch.get_str_iss()]
@@ -398,10 +394,9 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
         _cr = []
         cr = []
         for count, i in enumerate(temp):
-            if count != 0:
-                _cr += [" ".join([j.strip() for j in i.split(" ")][3:])]
-            else:
-                _cr += [i]
+            _cr += (
+                [" ".join([j.strip() for j in i.split(" ")][3:])] if count != 0 else [i]
+            )
         for count, i in enumerate(_cr):
             k = [j.strip() for j in i.split("(duration in minutes:")]
             task = k[0]
@@ -454,9 +449,8 @@ def run_gpt_prompt_task_decomp(persona, task, duration, test_input=None, verbose
         # TODO -- this sometimes generates error
         try:
             __func_clean_up(gpt_response)
-        except:
+        except Exception:
             pass
-            # return False
         return gpt_response
 
     def get_fail_safe():
@@ -591,9 +585,7 @@ def run_gpt_prompt_action_sector(
             return False
         if "}" not in gpt_response:
             return False
-        if "," in gpt_response:
-            return False
-        return True
+        return False if "," in gpt_response else True
 
     def get_fail_safe():
         fs = "kitchen"
@@ -725,9 +717,7 @@ def run_gpt_prompt_action_arena(
             return False
         if "}" not in gpt_response:
             return False
-        if "," in gpt_response:
-            return False
-        return True
+        return "," not in gpt_response
 
     def get_fail_safe():
         fs = "kitchen"
@@ -782,9 +772,7 @@ def run_gpt_prompt_action_game_object(
         return prompt_input
 
     def __func_validate(gpt_response, prompt=""):
-        if len(gpt_response.strip()) < 1:
-            return False
-        return True
+        return len(gpt_response.strip()) >= 1
 
     def __func_clean_up(gpt_response, prompt=""):
         cleaned_response = gpt_response.strip()
@@ -850,7 +838,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
             __func_clean_up(gpt_response, prompt="")
             if len(gpt_response) == 0:
                 return False
-        except:
+        except Exception:
             return False
         return True
 
@@ -872,7 +860,6 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
                 return False
         except:
             return False
-        return True
         return True
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 4")  ########
@@ -946,7 +933,7 @@ def run_gpt_prompt_event_triple(action_description, persona, verbose=False):
             gpt_response = __func_clean_up(gpt_response, prompt="")
             if len(gpt_response) != 2:
                 return False
-        except:
+        except Exception:
             return False
         return True
 
@@ -1031,7 +1018,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
     def __func_validate(gpt_response, prompt=""):
         try:
             gpt_response = __func_clean_up(gpt_response, prompt="")
-        except:
+        except Exception:
             return False
         return True
 
@@ -1120,7 +1107,7 @@ def run_gpt_prompt_act_obj_event_triple(
             gpt_response = __func_clean_up(gpt_response, prompt="")
             if len(gpt_response) != 2:
                 return False
-        except:
+        except Exception:
             return False
         return True
 
@@ -1222,7 +1209,7 @@ def run_gpt_prompt_new_decomp_schedule(
         return prompt_input
 
     def __func_clean_up(gpt_response, prompt=""):
-        new_schedule = prompt + " " + gpt_response.strip()
+        new_schedule = f"{prompt} {gpt_response.strip()}"
         new_schedule = new_schedule.split("The revised schedule:")[-1].strip()
         new_schedule = new_schedule.split("\n")
 
@@ -1265,10 +1252,10 @@ def run_gpt_prompt_new_decomp_schedule(
             ]
             delta_min = int((x[1] - x[0]).total_seconds() / 60)
 
-            if int(dur_sum) != int(delta_min):
+            if int(dur_sum) != delta_min:
                 return False
 
-        except:
+        except Exception:
             return False
         return True
 
@@ -1407,13 +1394,11 @@ def run_gpt_prompt_decide_to_talk(
 
     def __func_validate(gpt_response, prompt=""):
         try:
-            if gpt_response.split("Answer in yes or no:")[-1].strip().lower() in [
+            return gpt_response.split("Answer in yes or no:")[-1].strip().lower() in [
                 "yes",
                 "no",
-            ]:
-                return True
-            return False
-        except:
+            ]
+        except Exception:
             return False
 
     def __func_clean_up(gpt_response, prompt=""):
@@ -1531,14 +1516,12 @@ def run_gpt_prompt_decide_to_react(
 
     def __func_validate(gpt_response, prompt=""):
         try:
-            if gpt_response.split("Answer: Option")[-1].strip().lower() in [
+            return gpt_response.split("Answer: Option")[-1].strip().lower() in [
                 "3",
                 "2",
                 "1",
-            ]:
-                return True
-            return False
-        except:
+            ]
+        except Exception:
             return False
 
     def __func_clean_up(gpt_response, prompt=""):
@@ -1588,25 +1571,24 @@ def run_gpt_prompt_create_conversation(
                         / 60
                     )
                     prev_convo_insert += (
-                        f"{str(v1)} minutes ago, they had the following conversation.\n"
+                        f"{v1} minutes ago, they had the following conversation.\n"
                     )
                     for row in i.filling:
                         prev_convo_insert += f'{row[0]}: "{row[1]}"\n'
                     break
         if prev_convo_insert == "\n":
             prev_convo_insert = ""
-        if init_persona.a_mem.seq_chat:
-            if (
-                int(
-                    (
-                        init_persona.scratch.curr_time
-                        - init_persona.a_mem.seq_chat[-1].created
-                    ).total_seconds()
-                    / 60
-                )
-                > 480
-            ):
-                prev_convo_insert = ""
+        if init_persona.a_mem.seq_chat and (
+            int(
+                (
+                    init_persona.scratch.curr_time
+                    - init_persona.a_mem.seq_chat[-1].created
+                ).total_seconds()
+                / 60
+            )
+            > 480
+        ):
+            prev_convo_insert = ""
 
         init_persona_thought_nodes = init_persona.a_mem.retrieve_relevant_thoughts(
             target_persona.scratch.act_event[0],
@@ -1695,7 +1677,7 @@ def run_gpt_prompt_create_conversation(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe(init_persona, target_persona):
@@ -1741,14 +1723,14 @@ def run_gpt_prompt_summarize_conversation(
         return prompt_input
 
     def __func_clean_up(gpt_response, prompt=""):
-        ret = "conversing about " + gpt_response.strip()
+        ret = f"conversing about {gpt_response.strip()}"
         return ret
 
     def __func_validate(gpt_response, prompt=""):
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -1756,7 +1738,7 @@ def run_gpt_prompt_summarize_conversation(
 
     # ChatGPT Plugin ===========================================================
     def __chat_func_clean_up(gpt_response, prompt=""):  ############
-        ret = "conversing about " + gpt_response.strip()
+        ret = f"conversing about {gpt_response.strip()}"
         return ret
 
     def __chat_func_validate(gpt_response, prompt=""):  ############
@@ -1847,7 +1829,7 @@ def run_gpt_prompt_extract_keywords(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -1895,7 +1877,7 @@ def run_gpt_prompt_keyword_to_thoughts(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -1957,7 +1939,7 @@ def run_gpt_prompt_convo_to_thoughts(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2012,7 +1994,7 @@ def run_gpt_prompt_event_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2101,7 +2083,7 @@ def run_gpt_prompt_thought_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2190,7 +2172,7 @@ def run_gpt_prompt_chat_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2265,7 +2247,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
         return prompt_input
 
     def __func_clean_up(gpt_response, prompt=""):
-        gpt_response = "1) " + gpt_response.strip()
+        gpt_response = f"1) {gpt_response.strip()}"
         ret = []
         for i in gpt_response.split("\n"):
             ret += [i.split(") ")[-1]]
@@ -2275,7 +2257,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe(n):
@@ -2361,8 +2343,8 @@ def run_gpt_prompt_insight_and_guidance(
         return prompt_input
 
     def __func_clean_up(gpt_response, prompt=""):
-        gpt_response = "1. " + gpt_response.strip()
-        ret = dict()
+        gpt_response = f"1. {gpt_response.strip()}"
+        ret = {}
         for i in gpt_response.split("\n"):
             row = i.split(". ")[-1]
             thought = row.split("(because of ")[0].strip()
@@ -2376,7 +2358,7 @@ def run_gpt_prompt_insight_and_guidance(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe(n):
@@ -2432,7 +2414,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2518,7 +2500,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2611,21 +2593,20 @@ def run_gpt_prompt_agent_chat(
                     v1 = int(
                         (persona.scratch.curr_time - i.created).total_seconds() / 60
                     )
-                    prev_convo_insert += f"{str(v1)} minutes ago, {persona.scratch.name} and {target_persona.scratch.name} were already {i.description} This context takes place after that conversation."
+                    prev_convo_insert += f"{v1} minutes ago, {persona.scratch.name} and {target_persona.scratch.name} were already {i.description} This context takes place after that conversation."
                     break
         if prev_convo_insert == "\n":
             prev_convo_insert = ""
-        if persona.a_mem.seq_chat:
-            if (
-                int(
-                    (
-                        persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created
-                    ).total_seconds()
-                    / 60
-                )
-                > 480
-            ):
-                prev_convo_insert = ""
+        if persona.a_mem.seq_chat and (
+            int(
+                (
+                    persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created
+                ).total_seconds()
+                / 60
+            )
+            > 480
+        ):
+            prev_convo_insert = ""
         print(prev_convo_insert)
 
         curr_sector = f"{maze.access_tile(persona.scratch.curr_tile)['sector']}"
@@ -2674,7 +2655,7 @@ def run_gpt_prompt_agent_chat(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2767,7 +2748,7 @@ def run_gpt_prompt_summarize_ideas(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2867,7 +2848,7 @@ def run_gpt_prompt_generate_next_convo_line(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2943,7 +2924,7 @@ def run_gpt_prompt_generate_whisper_inner_thought(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -2995,7 +2976,7 @@ def run_gpt_prompt_planning_thought_on_convo(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -3045,7 +3026,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -3139,7 +3120,7 @@ def run_gpt_generate_safety_score(persona, comment, test_input=None, verbose=Fal
                 if field not in response:
                     return False
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
@@ -3183,9 +3164,7 @@ def extract_first_json_dict(data_str):
     json_str = data_str[start_idx:end_idx]
 
     try:
-        # Attempt to parse the JSON data
-        json_dict = json.loads(json_str)
-        return json_dict
+        return json.loads(json_str)
     except json.JSONDecodeError:
         # If parsing fails, return None
         return None
@@ -3218,21 +3197,20 @@ def run_gpt_generate_iterative_chat_utt(
                     v1 = int(
                         (persona.scratch.curr_time - i.created).total_seconds() / 60
                     )
-                    prev_convo_insert += f"{str(v1)} minutes ago, {persona.scratch.name} and {target_persona.scratch.name} were already {i.description} This context takes place after that conversation."
+                    prev_convo_insert += f"{v1} minutes ago, {persona.scratch.name} and {target_persona.scratch.name} were already {i.description} This context takes place after that conversation."
                     break
         if prev_convo_insert == "\n":
             prev_convo_insert = ""
-        if persona.a_mem.seq_chat:
-            if (
-                int(
-                    (
-                        persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created
-                    ).total_seconds()
-                    / 60
-                )
-                > 480
-            ):
-                prev_convo_insert = ""
+        if persona.a_mem.seq_chat and (
+            int(
+                (
+                    persona.scratch.curr_time - persona.a_mem.seq_chat[-1].created
+                ).total_seconds()
+                / 60
+            )
+            > 480
+        ):
+            prev_convo_insert = ""
         print(prev_convo_insert)
 
         curr_sector = f"{maze.access_tile(persona.scratch.curr_tile)['sector']}"
@@ -3272,7 +3250,7 @@ def run_gpt_generate_iterative_chat_utt(
     def __chat_func_clean_up(gpt_response, prompt=""):
         gpt_response = extract_first_json_dict(gpt_response)
 
-        cleaned_dict = dict()
+        cleaned_dict = {}
         cleaned = []
         for key, val in gpt_response.items():
             cleaned += [val]
@@ -3294,11 +3272,11 @@ def run_gpt_generate_iterative_chat_utt(
             # print ("debug 3")
 
             return True
-        except:
+        except Exception:
             return False
 
     def get_fail_safe():
-        cleaned_dict = dict()
+        cleaned_dict = {}
         cleaned_dict["utterance"] = "..."
         cleaned_dict["end"] = False
         return cleaned_dict

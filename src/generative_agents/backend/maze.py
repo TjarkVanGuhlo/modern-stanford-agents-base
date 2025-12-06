@@ -46,31 +46,31 @@ class Maze:
         # unique within an instance of Reverie.
         blocks_folder = f"{env_matrix}/special_blocks"
 
-        _wb = blocks_folder + "/world_blocks.csv"
+        _wb = f"{blocks_folder}/world_blocks.csv"
         wb_rows = read_file_to_list(_wb, header=False)
         wb = wb_rows[0][-1]
 
-        _sb = blocks_folder + "/sector_blocks.csv"
+        _sb = f"{blocks_folder}/sector_blocks.csv"
         sb_rows = read_file_to_list(_sb, header=False)
-        sb_dict = dict()
+        sb_dict = {}
         for i in sb_rows:
             sb_dict[i[0]] = i[-1]
 
-        _ab = blocks_folder + "/arena_blocks.csv"
+        _ab = f"{blocks_folder}/arena_blocks.csv"
         ab_rows = read_file_to_list(_ab, header=False)
-        ab_dict = dict()
+        ab_dict = {}
         for i in ab_rows:
             ab_dict[i[0]] = i[-1]
 
-        _gob = blocks_folder + "/game_object_blocks.csv"
+        _gob = f"{blocks_folder}/game_object_blocks.csv"
         gob_rows = read_file_to_list(_gob, header=False)
-        gob_dict = dict()
+        gob_dict = {}
         for i in gob_rows:
             gob_dict[i[0]] = i[-1]
 
         _slb = blocks_folder + "/spawning_location_blocks.csv"
         slb_rows = read_file_to_list(_slb, header=False)
-        slb_dict = dict()
+        slb_dict = {}
         for i in slb_rows:
             slb_dict[i[0]] = i[-1]
 
@@ -131,7 +131,7 @@ class Maze:
         for i in range(self.maze_height):
             row = []
             for j in range(self.maze_width):
-                tile_details = dict()
+                tile_details = {}
                 tile_details["world"] = wb
 
                 tile_details["sector"] = ""
@@ -184,7 +184,7 @@ class Maze:
         # self.address_tiles['<spawn_loc>bedroom-2-a'] == {(58, 9)}
         # self.address_tiles['double studio:recreation:pool table']
         #   == {(29, 14), (31, 11), (30, 14), (32, 11), ...},
-        self.address_tiles = dict()
+        self.address_tiles = {}
         for i in range(self.maze_height):
             for j in range(self.maze_width):
                 addresses = []
@@ -211,7 +211,7 @@ class Maze:
                     if add in self.address_tiles:
                         self.address_tiles[add].add((j, i))
                     else:
-                        self.address_tiles[add] = set([(j, i)])
+                        self.address_tiles[add] = {(j, i)}
 
     def turn_coordinate_to_tile(self, px_coordinate):
         """

@@ -16,9 +16,13 @@ from openai import OpenAI
 _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 from generative_agents.backend.config import (
-    MODEL_RETRIEVE_EMBEDDING,
+    MODEL_CONVERSE,
+    MODEL_EXECUTE,
+    MODEL_PERCEIVE,
     MODEL_PLAN,
     MODEL_REFLECT,
+    MODEL_RETRIEVE_EMBEDDING,
+    model_config,
 )
 from generative_agents.backend.utils import openai_api_key
 
@@ -63,7 +67,7 @@ def GPT4_request(prompt):
         )
         return completion.choices[0].message.content
 
-    except:
+    except Exception:
         print("ChatGPT ERROR")
         return "ChatGPT ERROR"
 
@@ -87,7 +91,7 @@ def ChatGPT_request(prompt):
         )
         return completion.choices[0].message.content
 
-    except:
+    except Exception:
         print("ChatGPT ERROR")
         return "ChatGPT ERROR"
 
@@ -128,7 +132,7 @@ def GPT4_safe_generate_response(
                 print(curr_gpt_response)
                 print("~~~~")
 
-        except:
+        except Exception:
             pass
 
     return False
@@ -175,7 +179,7 @@ def ChatGPT_safe_generate_response(
                 print(curr_gpt_response)
                 print("~~~~")
 
-        except:
+        except Exception:
             pass
 
     return False
@@ -203,7 +207,7 @@ def ChatGPT_safe_generate_response_OLD(
                 print(curr_gpt_response)
                 print("~~~~")
 
-        except:
+        except Exception:
             pass
     print("FAIL SAFE TRIGGERED")
     return fail_safe_response
@@ -320,8 +324,7 @@ if __name__ == "__main__":
         return len(gpt_response.strip().split(" ")) <= 1
 
     def __func_clean_up(gpt_response):
-        cleaned_response = gpt_response.strip()
-        return cleaned_response
+        return gpt_response.strip()
 
     output = safe_generate_response(
         prompt, gpt_parameter, 5, "rest", __func_validate, __func_clean_up, True

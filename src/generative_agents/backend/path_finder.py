@@ -33,9 +33,7 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
             return False
         if pos_r >= len(maze) or pos_c >= len(maze[0]):
             return False
-        if maze[pos_r][pos_c] in " E":
-            return True
-        return False
+        return bool(maze[pos_r][pos_c] in " E")
 
     def solve_maze(maze, start, verbose=False):
         path = []
@@ -45,7 +43,7 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
         # Add the entry point (as a tuple)
         stack.append(start)
         # Go through the stack as long as there are elements
-        while len(stack) > 0:
+        while stack:
             pos_r, pos_c = stack.pop()
             if verbose:
                 print("Current position", pos_r, pos_c)
@@ -81,10 +79,7 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
     for row in maze:
         new_row = []
         for j in row:
-            if j == collision_block_char:
-                new_row += ["#"]
-            else:
-                new_row += [" "]
+            new_row += ["#"] if j == collision_block_char else [" "]
         new_maze += [new_row]
 
     maze = new_maze
@@ -113,10 +108,7 @@ def path_finder_v2(a, start, end, collision_block_char, verbose=False):
     for row in a:
         new_row = []
         for j in row:
-            if j == collision_block_char:
-                new_row += [1]
-            else:
-                new_row += [0]
+            new_row += [1] if j == collision_block_char else [0]
         new_maze += [new_row]
     a = new_maze
 
@@ -171,9 +163,7 @@ def path_finder(maze, start, end, collision_block_char, verbose=False):
 
     path = path_finder_v2(maze, start, end, collision_block_char, verbose)
 
-    new_path = []
-    for i in path:
-        new_path += [(i[1], i[0])]
+    new_path = [(i[1], i[0]) for i in path]
     path = new_path
 
     return path
@@ -186,13 +176,9 @@ def closest_coordinate(curr_coordinate, target_coordinates):
         a = np.array(coordinate)
         b = np.array(curr_coordinate)
         dist = abs(np.linalg.norm(a - b))
-        if not closest_coordinate:
+        if closest_coordinate and min_dist > dist or not closest_coordinate:
             min_dist = dist
             closest_coordinate = coordinate
-        else:
-            if min_dist > dist:
-                min_dist = dist
-                closest_coordinate = coordinate
 
     return closest_coordinate
 
@@ -211,22 +197,21 @@ def path_finder_2(maze, start, end, collision_block_char, verbose=False):
 
     maze_width = len(maze[0])
     maze_height = len(maze)
-    target_coordinates = []
-    for coordinate in pot_target_coordinates:
+    target_coordinates = [
+        coordinate
+        for coordinate in pot_target_coordinates
         if (
             coordinate[0] >= 0
             and coordinate[0] < maze_width
             and coordinate[1] >= 0
             and coordinate[1] < maze_height
-        ):
-            target_coordinates += [coordinate]
-
+        )
+    ]
     target_coordinate = closest_coordinate(start, target_coordinates)
 
-    path = path_finder(
+    return path_finder(
         maze, start, target_coordinate, collision_block_char, verbose=False
     )
-    return path
 
 
 def path_finder_3(maze, start, end, collision_block_char, verbose=False):
@@ -236,9 +221,8 @@ def path_finder_3(maze, start, end, collision_block_char, verbose=False):
     curr_path = path_finder(maze, start, end, collision_block_char, verbose=False)
     if len(curr_path) <= 2:
         return []
-    else:
-        a_path = curr_path[: int(len(curr_path) / 2)]
-        b_path = curr_path[int(len(curr_path) / 2) - 1 :]
+    a_path = curr_path[: len(curr_path) // 2]
+    b_path = curr_path[len(curr_path) // 2 - 1 :]
     b_path.reverse()
 
     print(a_path)

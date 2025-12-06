@@ -26,16 +26,14 @@ def compress(sim_code: str) -> None:
             persona_names += [x]
 
     max_move_count = max(
-        [
-            int(i.split("/")[-1].split(".")[0])
-            for i in find_filenames(str(move_folder), "json")
-        ]
+        int(i.split("/")[-1].split(".")[0])
+        for i in find_filenames(str(move_folder), "json")
     )
 
-    persona_last_move = dict()
-    master_move = dict()
+    persona_last_move = {}
+    master_move = {}
     for i in range(max_move_count + 1):
-        master_move[i] = dict()
+        master_move[i] = {}
         with open(move_folder / f"{i}.json") as json_file:
             i_move_dict = json.load(json_file)["persona"]
             for p in persona_names:

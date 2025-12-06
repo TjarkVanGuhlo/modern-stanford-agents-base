@@ -54,23 +54,19 @@ def perceive(persona, maze):
     # in the form of a tree constructed using dictionaries.
     for i in nearby_tiles:
         i = maze.access_tile(i)
-        if i["world"]:
-            if i["world"] not in persona.s_mem.tree:
-                persona.s_mem.tree[i["world"]] = {}
-        if i["sector"]:
-            if i["sector"] not in persona.s_mem.tree[i["world"]]:
-                persona.s_mem.tree[i["world"]][i["sector"]] = {}
-        if i["arena"]:
-            if i["arena"] not in persona.s_mem.tree[i["world"]][i["sector"]]:
-                persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]] = []
-        if i["game_object"]:
-            if (
+        if i["world"] and i["world"] not in persona.s_mem.tree:
+            persona.s_mem.tree[i["world"]] = {}
+        if i["sector"] and i["sector"] not in persona.s_mem.tree[i["world"]]:
+            persona.s_mem.tree[i["world"]][i["sector"]] = {}
+        if i["arena"] and i["arena"] not in persona.s_mem.tree[i["world"]][i["sector"]]:
+            persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]] = []
+        if i["game_object"] and (
+            i["game_object"]
+            not in persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]]
+        ):
+            persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]] += [
                 i["game_object"]
-                not in persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]]
-            ):
-                persona.s_mem.tree[i["world"]][i["sector"]][i["arena"]] += [
-                    i["game_object"]
-                ]
+            ]
 
     # PERCEIVE EVENTS.
     # We will perceive events that take place in the same arena as the
@@ -86,28 +82,27 @@ def perceive(persona, maze):
     # percept_events_list
     for tile in nearby_tiles:
         tile_details = maze.access_tile(tile)
-        if tile_details["events"]:
-            if maze.get_tile_path(tile, "arena") == curr_arena_path:
-                # This calculates the distance between the persona's current tile,
-                # and the target tile.
-                dist = math.dist(
-                    [tile[0], tile[1]],
-                    [persona.scratch.curr_tile[0], persona.scratch.curr_tile[1]],
-                )
-                # Add any relevant events to our temp set/list with the distant info.
-                for event in tile_details["events"]:
-                    if event not in percept_events_set:
-                        percept_events_list += [[dist, event]]
-                        percept_events_set.add(event)
+        if (
+            tile_details["events"]
+            and maze.get_tile_path(tile, "arena") == curr_arena_path
+        ):
+            dist = math.dist(
+                [tile[0], tile[1]],
+                [persona.scratch.curr_tile[0], persona.scratch.curr_tile[1]],
+            )
+            # Add any relevant events to our temp set/list with the distant info.
+            for event in tile_details["events"]:
+                if event not in percept_events_set:
+                    percept_events_list += [[dist, event]]
+                    percept_events_set.add(event)
 
     # We sort, and perceive only persona.scratch.att_bandwidth of the closest
     # events. If the bandwidth is larger, then it means the persona can perceive
     # more elements within a small area.
     percept_events_list = sorted(percept_events_list, key=itemgetter(0))
-    perceived_events = []
-    for dist, event in percept_events_list[: persona.scratch.att_bandwidth]:
-        perceived_events += [event]
-
+    perceived_events = [
+        event for dist, event in percept_events_list[: persona.scratch.att_bandwidth]
+    ]
     # Storing events.
     # <ret_events> is a list of <ConceptNode> instances from the persona's
     # associative memory.

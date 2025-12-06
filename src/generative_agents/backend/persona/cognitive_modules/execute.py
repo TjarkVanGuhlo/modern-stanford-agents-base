@@ -71,11 +71,11 @@ def execute(persona, maze, personas, plan):
                     potential_path[int(len(potential_path) / 2) + 1],
                     collision_block_id,
                 )
-                if len(potential_1) <= len(potential_2):
-                    target_tiles = [potential_path[int(len(potential_path) / 2)]]
-                else:
-                    target_tiles = [potential_path[int(len(potential_path) / 2 + 1)]]
-
+                target_tiles = (
+                    [potential_path[int(len(potential_path) / 2)]]
+                    if len(potential_1) <= len(potential_2)
+                    else [potential_path[int(len(potential_path) / 2 + 1)]]
+                )
         elif "<waiting>" in plan:
             # Executing interaction where the persona has decided to wait before
             # executing their action.
@@ -89,16 +89,10 @@ def execute(persona, maze, personas, plan):
             target_tiles = maze.address_tiles[plan]
             target_tiles = random.sample(list(target_tiles), 1)
 
+        elif plan not in maze.address_tiles:
+            maze.address_tiles["Johnson Park:park:park garden"]  # ERRORRRRRRR
         else:
-            # This is our default execution. We simply take the persona to the
-            # location where the current action is taking place.
-            # Retrieve the target addresses. Again, plan is an action address in its
-            # string form. <maze.address_tiles> takes this and returns candidate
-            # coordinates.
-            if plan not in maze.address_tiles:
-                maze.address_tiles["Johnson Park:park:park garden"]  # ERRORRRRRRR
-            else:
-                target_tiles = maze.address_tiles[plan]
+            target_tiles = maze.address_tiles[plan]
 
         # There are sometimes more than one tile returned from this (e.g., a tabe
         # may stretch many coordinates). So, we sample a few here. And from that
@@ -139,13 +133,9 @@ def execute(persona, maze, personas, plan):
             curr_path = path_finder(
                 maze.collision_maze, curr_tile, i, collision_block_id
             )
-            if not closest_target_tile:
+            if not closest_target_tile or len(curr_path) < len(path):
                 closest_target_tile = i
                 path = curr_path
-            elif len(curr_path) < len(path):
-                closest_target_tile = i
-                path = curr_path
-
         # Actually setting the <planned_path> and <act_path_set>. We cut the
         # first element in the planned_path because it includes the curr_tile.
         persona.scratch.planned_path = path[1:]

@@ -119,11 +119,11 @@ def generate_hourly_schedule(persona, wake_up_hour):
     ]
     n_m1_activity = []
     diversity_repeat_count = 3
-    for i in range(diversity_repeat_count):
+    for _ in range(diversity_repeat_count):
         n_m1_activity_set = set(n_m1_activity)
         if len(n_m1_activity_set) < 5:
             n_m1_activity = []
-            for count, curr_hour_str in enumerate(hour_str):
+            for curr_hour_str in hour_str:
                 if wake_up_hour > 0:
                     n_m1_activity += ["sleeping"]
                     wake_up_hour -= 1
@@ -154,14 +154,7 @@ def generate_hourly_schedule(persona, wake_up_hour):
             if _n_m1_hourly_compressed:
                 _n_m1_hourly_compressed[-1][1] += 1
 
-    # Step 2. Expand to min scale (from hour scale)
-    # [['sleeping', 360], ['waking up and starting her morning routine', 60],
-    # ['eating breakfast', 60],..
-    n_m1_hourly_compressed = []
-    for task, duration in _n_m1_hourly_compressed:
-        n_m1_hourly_compressed += [[task, duration * 60]]
-
-    return n_m1_hourly_compressed
+    return [[task, duration * 60] for task, duration in _n_m1_hourly_compressed]
 
 
 def generate_task_decomp(persona, task, duration):
@@ -274,12 +267,10 @@ def generate_action_pronunciatio(act_desp, persona):
         print("GNS FUNCTION: <generate_action_pronunciatio>")
     try:
         x = run_gpt_prompt_pronunciatio(act_desp, persona)[0]
-    except:
+    except Exception:
         x = "🙂"
 
-    if not x:
-        return "🙂"
-    return x
+    return x or "🙂"
 
 
 def generate_action_event_triple(act_desp, persona):
@@ -325,7 +316,7 @@ def generate_convo(maze, init_persona, target_persona):
         utt = row[1]
         all_utt += f"{speaker}: {utt}\n"
 
-    convo_length = math.ceil(int(len(all_utt) / 8) / 30)
+    convo_length = math.ceil(len(all_utt) // 8 / 30)
 
     if debug:
         print("GNS FUNCTION: <generate_convo>")
@@ -333,8 +324,7 @@ def generate_convo(maze, init_persona, target_persona):
 
 
 def generate_convo_summary(persona, convo):
-    convo_summary = run_gpt_prompt_summarize_conversation(persona, convo)[0]
-    return convo_summary
+    return run_gpt_prompt_summarize_conversation(persona, convo)[0]
 
 
 def generate_decide_to_talk(init_persona, target_persona, retrieved):
@@ -342,10 +332,7 @@ def generate_decide_to_talk(init_persona, target_persona, retrieved):
     if debug:
         print("GNS FUNCTION: <generate_decide_to_talk>")
 
-    if x == "yes":
-        return True
-    else:
-        return False
+    return x == "yes"
 
 
 def generate_decide_to_react(init_persona, target_persona, retrieved):
@@ -403,7 +390,7 @@ def generate_new_decomp_schedule(
             main_act_dur += [[act, dur]]
             if dur_sum <= today_min_pass:
                 truncated_act_dur += [[act, dur]]
-            elif dur_sum > today_min_pass and not truncated_fin:
+            elif not truncated_fin:
                 # We need to insert that last act, duration list like this one:
                 # e.g., ['wakes up and completes her morning routine (wakes up...)', 2]
                 truncated_act_dur += [
@@ -563,7 +550,7 @@ def _long_term_planning(persona, new_day):
     thought = f"This is {persona.scratch.name}'s plan for {persona.scratch.curr_time.strftime('%A %B %d')}:"
     for i in persona.scratch.daily_req:
         thought += f" {i},"
-    thought = thought[:-1] + "."
+    thought = f"{thought[:-1]}."
     created = persona.scratch.curr_time
     expiration = persona.scratch.curr_time + datetime.timedelta(days=30)
     s, p, o = (
@@ -571,7 +558,7 @@ def _long_term_planning(persona, new_day):
         "plan",
         persona.scratch.curr_time.strftime("%A %B %d"),
     )
-    keywords = set(["plan"])
+    keywords = {"plan"}
     thought_poignancy = 5
     thought_embedding_pair = (thought, get_embedding(thought))
     persona.a_mem.add_thought(
@@ -640,34 +627,26 @@ def _determine_action(persona, maze):
     if curr_index == 0:
         # This portion is invoked if it is the first hour of the day.
         act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index]
-        if act_dura >= 60:
-            # We decompose if the next action is longer than an hour, and fits the
-            # criteria described in determine_decomp.
-            if determine_decomp(act_desp, act_dura):
-                persona.scratch.f_daily_schedule[curr_index : curr_index + 1] = (
-                    generate_task_decomp(persona, act_desp, act_dura)
-                )
+        if act_dura >= 60 and determine_decomp(act_desp, act_dura):
+            persona.scratch.f_daily_schedule[curr_index : curr_index + 1] = (
+                generate_task_decomp(persona, act_desp, act_dura)
+            )
         if curr_index_60 + 1 < len(persona.scratch.f_daily_schedule):
             act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60 + 1]
-            if act_dura >= 60:
-                if determine_decomp(act_desp, act_dura):
-                    persona.scratch.f_daily_schedule[
-                        curr_index_60 + 1 : curr_index_60 + 2
-                    ] = generate_task_decomp(persona, act_desp, act_dura)
+            if act_dura >= 60 and determine_decomp(act_desp, act_dura):
+                persona.scratch.f_daily_schedule[
+                    curr_index_60 + 1 : curr_index_60 + 2
+                ] = generate_task_decomp(persona, act_desp, act_dura)
 
-    if curr_index_60 < len(persona.scratch.f_daily_schedule):
-        # If it is not the first hour of the day, this is always invoked (it is
-        # also invoked during the first hour of the day -- to double up so we can
-        # decompose two hours in one go). Of course, we need to have something to
-        # decompose as well, so we check for that too.
-        if persona.scratch.curr_time.hour < 23:
-            # And we don't want to decompose after 11 pm.
-            act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60]
-            if act_dura >= 60:
-                if determine_decomp(act_desp, act_dura):
-                    persona.scratch.f_daily_schedule[
-                        curr_index_60 : curr_index_60 + 1
-                    ] = generate_task_decomp(persona, act_desp, act_dura)
+    if (
+        curr_index_60 < len(persona.scratch.f_daily_schedule)
+        and persona.scratch.curr_time.hour < 23
+    ):
+        act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index_60]
+        if act_dura >= 60 and determine_decomp(act_desp, act_dura):
+            persona.scratch.f_daily_schedule[curr_index_60 : curr_index_60 + 1] = (
+                generate_task_decomp(persona, act_desp, act_dura)
+            )
     # * End of Decompose *
 
     # Generate an <Action> instance from the action description and duration. By
@@ -766,9 +745,7 @@ def _choose_retrieved(persona, retrieved):
         curr_event = rel_ctx["curr_event"]
         if "is idle" not in event_desc:
             priority += [rel_ctx]
-    if priority:
-        return random.choice(priority)
-    return None
+    return random.choice(priority) if priority else None
 
 
 def _should_react(persona, retrieved, personas):
@@ -812,14 +789,13 @@ def _should_react(persona, retrieved, personas):
         if target_persona.scratch.chatting_with or init_persona.scratch.chatting_with:
             return False
 
-        if target_persona.name in init_persona.scratch.chatting_with_buffer:
-            if init_persona.scratch.chatting_with_buffer[target_persona.name] > 0:
-                return False
+        if (
+            target_persona.name in init_persona.scratch.chatting_with_buffer
+            and init_persona.scratch.chatting_with_buffer[target_persona.name] > 0
+        ):
+            return False
 
-        if generate_decide_to_talk(init_persona, target_persona, retrieved):
-            return True
-
-        return False
+        return bool(generate_decide_to_talk(init_persona, target_persona, retrieved))
 
     def lets_react(init_persona, target_persona, retrieved):
         if (
@@ -858,7 +834,6 @@ def _should_react(persona, retrieved, personas):
             return f"wait: {wait_until}"
         elif react_mode == "2":
             return False
-            return "do other things"
         else:
             return False  # "keep"
 
@@ -901,9 +876,10 @@ def _create_react(
 ):
     p = persona
 
-    min_sum = 0
-    for i in range(p.scratch.get_f_daily_schedule_hourly_org_index()):
-        min_sum += p.scratch.f_daily_schedule_hourly_org[i][1]
+    min_sum = sum(
+        p.scratch.f_daily_schedule_hourly_org[i][1]
+        for i in range(p.scratch.get_f_daily_schedule_hourly_org_index())
+    )
     start_hour = int(min_sum / 60)
 
     if (
@@ -949,9 +925,9 @@ def _create_react(
     start_index = None
     end_index = None
     for act, dur in p.scratch.f_daily_schedule:
-        if dur_sum >= start_hour * 60 and start_index == None:
+        if dur_sum >= start_hour * 60 and start_index is None:
             start_index = count
-        if dur_sum >= end_hour * 60 and end_index == None:
+        if dur_sum >= end_hour * 60 and end_index is None:
             end_index = count
         dur_sum += dur
         count += 1
@@ -1001,21 +977,18 @@ def _chat_react(maze, persona, focused_event, reaction_mode, personas):
     else:
         chatting_end_time = curr_time + datetime.timedelta(minutes=inserted_act_dur)
 
+    act_pronunciatio = "💬"
     for role, p in [("init", init_persona), ("target", target_persona)]:
         if role == "init":
             act_address = f"<persona> {target_persona.name}"
             act_event = (p.name, "chat with", target_persona.name)
             chatting_with = target_persona.name
-            chatting_with_buffer = {}
-            chatting_with_buffer[target_persona.name] = 800
+            chatting_with_buffer = {target_persona.name: 800}
         elif role == "target":
             act_address = f"<persona> {init_persona.name}"
             act_event = (p.name, "chat with", init_persona.name)
             chatting_with = init_persona.name
-            chatting_with_buffer = {}
-            chatting_with_buffer[init_persona.name] = 800
-
-        act_pronunciatio = "💬"
+            chatting_with_buffer = {init_persona.name: 800}
         act_obj_description = None
         act_obj_pronunciatio = None
         act_obj_event = (None, None, None)
@@ -1134,16 +1107,12 @@ def plan(persona, maze, personas, new_day, retrieved):
     #         b) "react"
     #         c) False
     if focused_event:
-        reaction_mode = _should_react(persona, focused_event, personas)
-        if reaction_mode:
+        if reaction_mode := _should_react(persona, focused_event, personas):
             # If we do want to chat, then we generate conversation
             if reaction_mode[:9] == "chat with":
                 _chat_react(maze, persona, focused_event, reaction_mode, personas)
             elif reaction_mode[:4] == "wait":
                 _wait_react(persona, reaction_mode)
-            # elif reaction_mode == "do other things":
-            #   _chat_react(persona, focused_event, reaction_mode, personas)
-
     # Step 3: Chat-related state clean up.
     # If the persona is not chatting with anyone, we clean up any of the
     # chat-related states here.

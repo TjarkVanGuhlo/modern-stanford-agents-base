@@ -144,7 +144,7 @@ class Scratch:
         self.chat = None
         # <chatting_with_buffer>
         # e.g., ["Dolores Murphy"] = self.vision_r
-        self.chatting_with_buffer = dict()
+        self.chatting_with_buffer = {}
         self.chatting_end_time = None
 
         # <path_set> is True if we've already calculated the path the persona will
@@ -245,7 +245,7 @@ class Scratch:
         OUTPUT:
           None
         """
-        scratch = dict()
+        scratch = {}
         scratch["vision_r"] = self.vision_r
         scratch["att_bandwidth"] = self.att_bandwidth
         scratch["retention"] = self.retention
@@ -334,13 +334,8 @@ class Scratch:
         today_min_elapsed += self.curr_time.minute
         today_min_elapsed += advance
 
-        x = 0
-        for task, duration in self.f_daily_schedule:
-            x += duration
-        x = 0
-        for task, duration in self.f_daily_schedule_hourly_org:
-            x += duration
-
+        x = sum(duration for task, duration in self.f_daily_schedule)
+        x = sum(duration for task, duration in self.f_daily_schedule_hourly_org)
         # We then calculate the current index based on that.
         curr_index = 0
         elapsed = 0
@@ -443,10 +438,7 @@ class Scratch:
         return self.curr_time.strftime("%A %B %d")
 
     def get_curr_event(self):
-        if not self.act_address:
-            return (self.name, None, None)
-        else:
-            return self.act_event
+        return self.act_event if self.act_address else (self.name, None, None)
 
     def get_curr_event_and_desc(self):
         if not self.act_address:
@@ -542,9 +534,7 @@ class Scratch:
                 x = x + datetime.timedelta(minutes=1)
             end_time = x + datetime.timedelta(minutes=self.act_duration)
 
-        if end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S"):
-            return True
-        return False
+        return end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S")
 
     def act_summarize(self):
         """
@@ -555,7 +545,7 @@ class Scratch:
         OUTPUT
           ret: A human readable summary of the action.
         """
-        exp = dict()
+        exp = {}
         exp["persona"] = self.name
         exp["address"] = self.act_address
         exp["start_datetime"] = self.act_start_time

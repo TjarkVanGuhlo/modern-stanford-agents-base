@@ -21,7 +21,7 @@ class MemoryTree:
     def print_tree(self):
         def _print_tree(tree, depth):
             dash = " >" * depth
-            if type(tree) == type(list()):
+            if type(tree) == type([]):
                 if tree:
                     print(dash, tree)
                 return
@@ -52,8 +52,7 @@ class MemoryTree:
         EXAMPLE STR OUTPUT
           "bedroom, kitchen, dining room, office, bathroom"
         """
-        x = ", ".join(list(self.tree[curr_world].keys()))
-        return x
+        return ", ".join(list(self.tree[curr_world].keys()))
 
     def get_str_accessible_sector_arenas(self, sector):
         """
@@ -73,8 +72,7 @@ class MemoryTree:
         curr_world, curr_sector = sector.split(":")
         if not curr_sector:
             return ""
-        x = ", ".join(list(self.tree[curr_world][curr_sector].keys()))
-        return x
+        return ", ".join(list(self.tree[curr_world][curr_sector].keys()))
 
     def get_str_accessible_arena_game_objects(self, arena):
         """
@@ -97,7 +95,7 @@ class MemoryTree:
 
         try:
             x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena]))
-        except:
+        except Exception:
             x = ", ".join(list(self.tree[curr_world][curr_sector][curr_arena.lower()]))
         return x
 
