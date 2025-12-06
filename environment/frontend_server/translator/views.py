@@ -197,13 +197,13 @@ def replay_persona_state(request, sim_code, step, persona_name):
             f"compressed_storage/{sim_code}/personas/{persona_name}/bootstrap_memory"
         )
 
-    with open(f"{memory}/scratch.json") as json_file:
+    with open(os.path.join(memory, "scratch.json")) as json_file:
         scratch = json.load(json_file)
 
-    with open(f"{memory}/spatial_memory.json") as json_file:
+    with open(os.path.join(memory, "spatial_memory.json")) as json_file:
         spatial = json.load(json_file)
 
-    with open(f"{memory}/associative_memory/nodes.json") as json_file:
+    with open(os.path.join(memory, "associative_memory", "nodes.json")) as json_file:
         associative = json.load(json_file)
 
     a_mem_event = []

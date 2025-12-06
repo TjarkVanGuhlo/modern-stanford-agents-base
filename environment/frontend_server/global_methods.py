@@ -57,7 +57,7 @@ def write_list_of_list_to_csv(curr_list_of_list, outfile):
       None
     """
     create_folder_if_not_there(outfile)
-    with open(outfile, "w") as f:
+    with open(outfile, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerows(curr_list_of_list)
 
@@ -81,6 +81,7 @@ def write_list_to_csv_line(line_list, outfile):
     with open(
         outfile,
         "a",
+        newline="",
     ) as curr_file:
         csvfile_1 = csv.writer(curr_file)
         csvfile_1.writerow(line_list)
@@ -146,7 +147,7 @@ def get_row_len(curr_file):
             for row in data_reader:
                 analysis_set.add(row[0])
         return len(analysis_set)
-    except Exception:
+    except (OSError, FileNotFoundError):
         return False
 
 
@@ -163,7 +164,7 @@ def check_if_file_exists(curr_file):
         with open(curr_file):
             pass
         return True
-    except Exception:
+    except (OSError, FileNotFoundError):
         return False
 
 
