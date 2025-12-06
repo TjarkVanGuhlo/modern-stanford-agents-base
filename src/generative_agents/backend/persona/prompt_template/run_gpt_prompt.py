@@ -731,7 +731,9 @@ def run_gpt_prompt_action_arena(
     def get_accessible_arenas():
         sector_key = f"{act_world}:{act_sector}"
         accessible = persona.s_mem.get_str_accessible_sector_arenas(sector_key)
-        return [i.strip() for i in accessible.split(",")] if accessible else []
+        if not accessible:
+            return []
+        return [s for s in (i.strip() for i in accessible.split(",")) if s]
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -755,8 +757,14 @@ def run_gpt_prompt_action_arena(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
 
-    if output not in accessible_arenas:
-        output = random.choice(accessible_arenas) if accessible_arenas else fail_safe
+    normalized_output = output.strip().lower()
+    normalized_arenas = {arena.lower(): arena for arena in accessible_arenas}
+    if normalized_output in normalized_arenas:
+        output = normalized_arenas[normalized_output]
+    elif accessible_arenas:
+        output = random.choice(accessible_arenas)
+    else:
+        output = fail_safe
     print(output)
 
     if debug or verbose:
@@ -790,7 +798,9 @@ def run_gpt_prompt_action_game_object(
 
     def get_accessible_game_objects():
         accessible = persona.s_mem.get_str_accessible_arena_game_objects(temp_address)
-        return [i.strip() for i in accessible.split(",")] if accessible else []
+        if not accessible:
+            return []
+        return [s for s in (i.strip() for i in accessible.split(",")) if s]
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -814,8 +824,14 @@ def run_gpt_prompt_action_game_object(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
 
-    if output not in accessible_objects:
-        output = random.choice(accessible_objects) if accessible_objects else fail_safe
+    normalized_output = output.strip().lower()
+    normalized_objects = {obj.lower(): obj for obj in accessible_objects}
+    if normalized_output in normalized_objects:
+        output = normalized_objects[normalized_output]
+    elif accessible_objects:
+        output = random.choice(accessible_objects)
+    else:
+        output = fail_safe
 
     if debug or verbose:
         print_run_prompts(
