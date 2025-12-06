@@ -21,11 +21,15 @@ ENVIRONMENT_DIR = PROJECT_ROOT / "environment" / "frontend_server"
 # OpenAI API Configuration (loaded from .env - these are actual secrets)
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is required. Please set it in your .env file.")
+    raise ValueError(
+        "OPENAI_API_KEY environment variable is required. Please set it in your .env file."
+    )
 
 key_owner = os.getenv("KEY_OWNER")
 if not key_owner:
-    raise ValueError("KEY_OWNER environment variable is required. Please set it in your .env file.")
+    raise ValueError(
+        "KEY_OWNER environment variable is required. Please set it in your .env file."
+    )
 
 # Path Configuration (using pathlib for proper path handling)
 maze_assets_loc = ENVIRONMENT_DIR / "static_dirs" / "assets"
@@ -38,13 +42,14 @@ fs_temp_storage = ENVIRONMENT_DIR / "temp_storage"
 collision_block_id = "32125"
 
 # Import cognitive models from config (these are configuration, not secrets)
+# Re-export for backward compatibility
 from generative_agents.backend.config import (
+    MODEL_CONVERSE,
+    MODEL_EXECUTE,
     MODEL_PERCEIVE,
-    MODEL_RETRIEVE_EMBEDDING,
     MODEL_PLAN,
     MODEL_REFLECT,
-    MODEL_EXECUTE,
-    MODEL_CONVERSE,
+    MODEL_RETRIEVE_EMBEDDING,
     model_config,
 )
 
