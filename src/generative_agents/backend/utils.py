@@ -43,15 +43,6 @@ collision_block_id = "32125"
 
 # Import cognitive models from config (these are configuration, not secrets)
 # Re-export for backward compatibility
-from generative_agents.backend.config import (
-    MODEL_CONVERSE,
-    MODEL_EXECUTE,
-    MODEL_PERCEIVE,
-    MODEL_PLAN,
-    MODEL_REFLECT,
-    MODEL_RETRIEVE_EMBEDDING,
-    model_config,
-)
 
 # Verbose
 debug = True

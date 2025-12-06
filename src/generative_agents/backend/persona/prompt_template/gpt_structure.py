@@ -16,13 +16,9 @@ from openai import OpenAI
 _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 from generative_agents.backend.config import (
-    MODEL_CONVERSE,
-    MODEL_EXECUTE,
-    MODEL_PERCEIVE,
     MODEL_PLAN,
     MODEL_REFLECT,
     MODEL_RETRIEVE_EMBEDDING,
-    model_config,
 )
 from generative_agents.backend.utils import openai_api_key
 
