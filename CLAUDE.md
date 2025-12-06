@@ -73,6 +73,13 @@ uv run ruff format src/
 
 # Fix auto-fixable issues
 uv run ruff check --fix src/
+
+# Type checking
+uv run ty check src/
+
+# Code quality review (with auto-fix)
+uv run sourcery review src/
+uv run sourcery review --fix src/
 ```
 
 ### Running the Simulation
