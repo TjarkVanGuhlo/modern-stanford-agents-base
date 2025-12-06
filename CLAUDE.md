@@ -80,7 +80,12 @@ uv run ty check src/
 # Code quality review (with auto-fix)
 uv run sourcery review src/
 uv run sourcery review --fix src/
+
+# Find dead code
+uv run vulture src/
 ```
+
+Vulture is configured in `pyproject.toml` with ignore rules for TypedDict fields and public API methods.
 
 ### Running the Simulation
 
@@ -155,7 +160,7 @@ The system implements a perceive-retrieve-plan-reflect-execute cycle for each ag
 
 Models are configured in `src/generative_agents/backend/config.py` via the `ModelConfig` class, **not** in .env (they are configuration choices, not secrets).
 
-**Cognitive Functions and Models**:
+**Cognitive Functions and Models** (balanced preset):
 | Function | Default Model | Purpose |
 |----------|---------------|---------|
 | PERCEIVE | gpt-5-mini | Environment observation |
@@ -164,6 +169,8 @@ Models are configured in `src/generative_agents/backend/config.py` via the `Mode
 | REFLECT | gpt-5 | Memory synthesis |
 | EXECUTE | gpt-5-mini | Action execution |
 | CONVERSE | gpt-5 | Dialogue |
+
+**Presets**: `performance` (all gpt-5), `balanced` (default, mix), `economy` (gpt-5-mini/gpt-5-nano)
 
 **Environment-Based Configuration**:
 ```bash
@@ -227,26 +234,46 @@ MODEL_PERCEIVE=gpt-5-mini
 
 ## Storage Locations
 
-- Simulations: `environment/frontend_server/storage/`
-- Compressed demos: `environment/frontend_server/compressed_storage/`
-- Maze assets: `environment/frontend_server/static_dirs/assets/`
-- Temp storage: `environment/frontend_server/temp_storage/`
+- **Simulations**: `environment/frontend_server/storage/` - Raw simulation state (used by `/replay/`)
+- **Compressed demos**: `environment/frontend_server/compressed_storage/` - Optimized for playback with proper sprites (used by `/demo/`)
+- **Maze assets**: `environment/frontend_server/static_dirs/assets/`
+- **Temp storage**: `environment/frontend_server/temp_storage/`
+
+To compress a simulation for demo playback, use the `compress` function in `src/generative_agents/compress.py`.
 
 ## Debugging Commands
 
 The backend server provides an interactive REPL with commands:
 
 ```
+# Simulation control
+run <step-count>                           # Run N steps (10 seconds each)
+fin                                        # Save and exit
+save                                       # Save without exiting
+exit                                       # Exit without saving
+
+# Schedule inspection
 print persona schedule <name>              # Show decomposed daily schedule
+print hourly org persona schedule <name>   # Show non-decomposed hourly schedule
 print all persona schedule                 # Show all agent schedules
+
+# Memory inspection
 print persona associative memory (event) <name>
 print persona associative memory (thought) <name>
 print persona associative memory (chat) <name>
 print persona spatial memory <name>        # Show world knowledge tree
+
+# State inspection
 print current time                         # Show simulation time and step count
+print persona current tile <name>          # Show persona's x,y tile coordinate
+print persona chatting with buffer <name>  # Show chat buffer state
 print tile event <x>, <y>                  # Show events at tile coordinate
+print tile details <x>, <y>                # Show complete tile details
+
+# Interactive commands
 call -- analysis <name>                    # Start stateless chat with agent
 call -- load history the_ville/<file>.csv  # Batch load agent memories
+start path tester mode                     # Enter pathfinding test mode
 ```
 
 ## Key Technical Details
