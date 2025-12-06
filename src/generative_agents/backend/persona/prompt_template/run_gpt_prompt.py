@@ -728,9 +728,14 @@ def run_gpt_prompt_action_arena(
             return False
         return "}" in gpt_response and "," not in gpt_response
 
+    def get_accessible_arenas():
+        sector_key = f"{act_world}:{act_sector}"
+        accessible = persona.s_mem.get_str_accessible_sector_arenas(sector_key)
+        return [i.strip() for i in accessible.split(", ")] if accessible else []
+
     def get_fail_safe():
-        fs = "kitchen"
-        return fs
+        arenas = get_accessible_arenas()
+        return arenas[0] if arenas else "main room"
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -753,10 +758,10 @@ def run_gpt_prompt_action_arena(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
     print(output)
-    # y = f"{act_world}:{act_sector}"
-    # x = [i.strip() for i in persona.s_mem.get_str_accessible_sector_arenas(y).split(",")]
-    # if output not in x:
-    #   output = random.choice(x)
+
+    accessible_arenas = get_accessible_arenas()
+    if output not in accessible_arenas:
+        output = random.choice(accessible_arenas) if accessible_arenas else fail_safe
 
     if debug or verbose:
         print_run_prompts(
@@ -787,9 +792,13 @@ def run_gpt_prompt_action_game_object(
         cleaned_response = gpt_response.strip()
         return cleaned_response
 
+    def get_accessible_game_objects():
+        accessible = persona.s_mem.get_str_accessible_arena_game_objects(temp_address)
+        return [i.strip() for i in accessible.split(", ")] if accessible else []
+
     def get_fail_safe():
-        fs = "bed"
-        return fs
+        game_objects = get_accessible_game_objects()
+        return game_objects[0] if game_objects else "bed"
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -812,14 +821,9 @@ def run_gpt_prompt_action_game_object(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
 
-    x = [
-        i.strip()
-        for i in persona.s_mem.get_str_accessible_arena_game_objects(
-            temp_address
-        ).split(",")
-    ]
-    if output not in x:
-        output = random.choice(x)
+    accessible_objects = get_accessible_game_objects()
+    if accessible_objects and output not in accessible_objects:
+        output = random.choice(accessible_objects)
 
     if debug or verbose:
         print_run_prompts(
