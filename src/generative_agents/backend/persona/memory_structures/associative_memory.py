@@ -141,7 +141,8 @@ class AssociativeMemory:
                     filling,
                 )
 
-        kw_strength_load = json.load(open(f_saved + "/kw_strength.json"))
+        with open(f"{f_saved}/kw_strength.json") as f:
+            kw_strength_load = json.load(f)
         if kw_strength_load["kw_strength_event"]:
             self.kw_strength_event = kw_strength_load["kw_strength_event"]
         if kw_strength_load["kw_strength_thought"]:

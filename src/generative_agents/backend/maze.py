@@ -64,42 +64,30 @@ class Maze:
 
         _sb = f"{blocks_folder}/sector_blocks.csv"
         sb_rows = read_file_to_list(_sb, header=False)
-        sb_dict = {}
-        for i in sb_rows:
-            sb_dict[i[0]] = i[-1]
-
+        sb_dict = {i[0]: i[-1] for i in sb_rows}
         _ab = f"{blocks_folder}/arena_blocks.csv"
         ab_rows = read_file_to_list(_ab, header=False)
-        ab_dict = {}
-        for i in ab_rows:
-            ab_dict[i[0]] = i[-1]
-
+        ab_dict = {i[0]: i[-1] for i in ab_rows}
         _gob = f"{blocks_folder}/game_object_blocks.csv"
         gob_rows = read_file_to_list(_gob, header=False)
-        gob_dict = {}
-        for i in gob_rows:
-            gob_dict[i[0]] = i[-1]
-
-        _slb = blocks_folder + "/spawning_location_blocks.csv"
+        gob_dict = {i[0]: i[-1] for i in gob_rows}
+        _slb = f"{blocks_folder}/spawning_location_blocks.csv"
         slb_rows = read_file_to_list(_slb, header=False)
-        slb_dict = {}
-        for i in slb_rows:
-            slb_dict[i[0]] = i[-1]
-
+        slb_dict = {i[0]: i[-1] for i in slb_rows}
         # [SECTION 3] Reading in the matrices
         # This is your typical two dimensional matrices. It's made up of 0s and
         # the number that represents the color block from the blocks folder.
         maze_folder = f"{env_matrix}/maze"
 
-        _cm = maze_folder + "/collision_maze.csv"
+        _cm = f"{maze_folder}/collision_maze.csv"
         collision_maze_raw = read_file_to_list(_cm, header=False)[0]
-        _sm = maze_folder + "/sector_maze.csv"
+        _sm = f"{maze_folder}/sector_maze.csv"
         sector_maze_raw = read_file_to_list(_sm, header=False)[0]
-        _am = maze_folder + "/arena_maze.csv"
+        _am = f"{maze_folder}/arena_maze.csv"
         arena_maze_raw = read_file_to_list(_am, header=False)[0]
-        _gom = maze_folder + "/game_object_maze.csv"
+        _gom = f"{maze_folder}/game_object_maze.csv"
         game_object_maze_raw = read_file_to_list(_gom, header=False)[0]
-        _slm = maze_folder + "/spawning_location_maze.csv"
+        _slm = f"{maze_folder}/spawning_location_maze.csv"
         spawning_location_maze_raw = read_file_to_list(_slm, header=False)[0]
 
         # Loading the maze. The mazes are taken directly from the json exports of

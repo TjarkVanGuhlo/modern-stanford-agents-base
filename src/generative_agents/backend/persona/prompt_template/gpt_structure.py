@@ -122,7 +122,7 @@ def GPT4_safe_generate_response(
         f"Output the response to the prompt above in json. {special_instruction}\n"
     )
     prompt += "Example output json:\n"
-    prompt += '{"output": "' + str(example_output) + '"}'
+    prompt += '{"output": "' + example_output + '"}'
 
     if verbose:
         print("CHAT GPT PROMPT")
@@ -135,7 +135,9 @@ def GPT4_safe_generate_response(
             curr_gpt_response = curr_gpt_response[:end_index]
             curr_gpt_response = json.loads(curr_gpt_response)["output"]
 
-            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+            if func_validate is not None and func_validate(
+                curr_gpt_response, prompt=prompt
+            ):
                 if func_clean_up is not None:
                     return func_clean_up(curr_gpt_response, prompt=prompt)
                 return curr_gpt_response
@@ -167,7 +169,7 @@ def ChatGPT_safe_generate_response(
         f"Output the response to the prompt above in json. {special_instruction}\n"
     )
     prompt += "Example output json:\n"
-    prompt += '{"output": "' + str(example_output) + '"}'
+    prompt += '{"output": "' + example_output + '"}'
 
     if verbose:
         print("CHAT GPT PROMPT")
@@ -180,7 +182,9 @@ def ChatGPT_safe_generate_response(
             curr_gpt_response = curr_gpt_response[:end_index]
             curr_gpt_response = json.loads(curr_gpt_response)["output"]
 
-            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+            if func_validate is not None and func_validate(
+                curr_gpt_response, prompt=prompt
+            ):
                 if func_clean_up is not None:
                     return func_clean_up(curr_gpt_response, prompt=prompt)
                 return curr_gpt_response
@@ -211,7 +215,9 @@ def ChatGPT_safe_generate_response_OLD(
     for i in range(repeat):
         try:
             curr_gpt_response = ChatGPT_request(prompt).strip()
-            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+            if func_validate is not None and func_validate(
+                curr_gpt_response, prompt=prompt
+            ):
                 if func_clean_up is not None:
                     return func_clean_up(curr_gpt_response, prompt=prompt)
                 return curr_gpt_response
@@ -302,7 +308,9 @@ def safe_generate_response(
 
     for i in range(repeat):
         curr_gpt_response = GPT_request(prompt, gpt_parameter)
-        if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+        if func_validate is not None and func_validate(
+            curr_gpt_response, prompt=prompt
+        ):
             if func_clean_up is not None:
                 return func_clean_up(curr_gpt_response, prompt=prompt)
             return curr_gpt_response

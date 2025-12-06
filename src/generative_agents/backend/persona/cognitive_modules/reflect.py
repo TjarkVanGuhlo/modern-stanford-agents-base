@@ -8,7 +8,9 @@ Description: This defines the "Reflect" module for generative agents.
 import datetime
 
 from generative_agents.backend.utils import debug
-from generative_agents.backend.persona.prompt_template.gpt_structure import get_embedding
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    get_embedding,
+)
 from generative_agents.backend.persona.cognitive_modules.retrieve import new_retrieve
 from generative_agents.backend.persona.prompt_template.run_gpt_prompt import (
     run_gpt_prompt_chat_poignancy,

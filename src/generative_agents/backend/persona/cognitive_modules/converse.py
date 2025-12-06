@@ -8,7 +8,9 @@ Description: An extra cognitive module for generating conversations.
 import datetime
 
 from generative_agents.backend.utils import debug
-from generative_agents.backend.persona.prompt_template.gpt_structure import get_embedding
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    get_embedding,
+)
 from generative_agents.backend.persona.cognitive_modules.retrieve import new_retrieve
 from generative_agents.backend.persona.prompt_template.run_gpt_prompt import (
     run_gpt_generate_iterative_chat_utt,
@@ -140,7 +142,7 @@ def agent_chat_v2(maze, init_persona, target_persona):
     curr_chat = []
     print("July 23")
 
-    for i in range(8):
+    for _ in range(8):
         focal_points = [f"{target_persona.scratch.name}"]
         retrieved = new_retrieve(init_persona, focal_points, 50)
         relationship = generate_summarize_agent_relationship(
@@ -148,17 +150,12 @@ def agent_chat_v2(maze, init_persona, target_persona):
         )
         print("-------- relationshopadsjfhkalsdjf", relationship)
         last_chat = "".join(": ".join(i) + "\n" for i in curr_chat[-4:])
+        focal_points = [
+            f"{relationship}",
+            f"{target_persona.scratch.name} is {target_persona.scratch.act_description}",
+        ]
         if last_chat:
-            focal_points = [
-                f"{relationship}",
-                f"{target_persona.scratch.name} is {target_persona.scratch.act_description}",
-                last_chat,
-            ]
-        else:
-            focal_points = [
-                f"{relationship}",
-                f"{target_persona.scratch.name} is {target_persona.scratch.act_description}",
-            ]
+            focal_points.append(last_chat)
         retrieved = new_retrieve(init_persona, focal_points, 15)
         utt, end = generate_one_utterance(
             maze, init_persona, target_persona, retrieved, curr_chat
@@ -174,20 +171,13 @@ def agent_chat_v2(maze, init_persona, target_persona):
             target_persona, init_persona, retrieved
         )
         print("-------- relationshopadsjfhkalsdjf", relationship)
-        last_chat = ""
-        for i in curr_chat[-4:]:
-            last_chat += ": ".join(i) + "\n"
+        last_chat = "".join(": ".join(i) + "\n" for i in curr_chat[-4:])
+        focal_points = [
+            f"{relationship}",
+            f"{init_persona.scratch.name} is {init_persona.scratch.act_description}",
+        ]
         if last_chat:
-            focal_points = [
-                f"{relationship}",
-                f"{init_persona.scratch.name} is {init_persona.scratch.act_description}",
-                last_chat,
-            ]
-        else:
-            focal_points = [
-                f"{relationship}",
-                f"{init_persona.scratch.name} is {init_persona.scratch.act_description}",
-            ]
+            focal_points.append(last_chat)
         retrieved = new_retrieve(target_persona, focal_points, 15)
         utt, end = generate_one_utterance(
             maze, target_persona, init_persona, retrieved, curr_chat

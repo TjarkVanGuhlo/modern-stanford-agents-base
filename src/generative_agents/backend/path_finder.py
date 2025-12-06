@@ -43,7 +43,7 @@ def path_finder_v1(maze, start, end, collision_block_char, verbose=False):
             return False
         if pos_r >= len(maze) or pos_c >= len(maze[0]):
             return False
-        return bool(maze[pos_r][pos_c] in " E")
+        return maze[pos_r][pos_c] in " E"
 
     def solve_maze(maze, start, verbose=False):
         path = []

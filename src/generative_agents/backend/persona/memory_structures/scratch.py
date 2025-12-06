@@ -252,16 +252,16 @@ class Scratch:
         OUTPUT:
           None
         """
-        scratch = {}
-        scratch["vision_r"] = self.vision_r
-        scratch["att_bandwidth"] = self.att_bandwidth
-        scratch["retention"] = self.retention
-
-        scratch["curr_time"] = (
-            self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else ""
-        )
-        scratch["curr_tile"] = self.curr_tile
-        scratch["daily_plan_req"] = self.daily_plan_req
+        scratch = {
+            "vision_r": self.vision_r,
+            "att_bandwidth": self.att_bandwidth,
+            "retention": self.retention,
+            "curr_time": self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+            if self.curr_time
+            else "",
+            "curr_tile": self.curr_tile,
+            "daily_plan_req": self.daily_plan_req,
+        }
 
         scratch["name"] = self.name
         scratch["first_name"] = self.first_name
@@ -563,14 +563,14 @@ class Scratch:
         OUTPUT
           ret: A human readable summary of the action.
         """
-        exp = {}
-        exp["persona"] = self.name
-        exp["address"] = self.act_address
-        exp["start_datetime"] = self.act_start_time
-        exp["duration"] = self.act_duration
-        exp["description"] = self.act_description
-        exp["pronunciatio"] = self.act_pronunciatio
-        return exp
+        return {
+            "persona": self.name,
+            "address": self.act_address,
+            "start_datetime": self.act_start_time,
+            "duration": self.act_duration,
+            "description": self.act_description,
+            "pronunciatio": self.act_pronunciatio,
+        }
 
     def act_summary_str(self):
         """
