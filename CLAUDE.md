@@ -139,12 +139,12 @@ Models are configured in `src/generative_agents/backend/config.py` via the `Mode
 **Cognitive Functions and Models**:
 | Function | Default Model | Purpose |
 |----------|---------------|---------|
-| PERCEIVE | gpt-4o-mini | Environment observation |
+| PERCEIVE | gpt-5-mini | Environment observation |
 | RETRIEVE_EMBEDDING | text-embedding-3-large | Memory retrieval similarity |
-| PLAN | gpt-4o | Action planning |
-| REFLECT | gpt-4o | Memory synthesis |
-| EXECUTE | gpt-4o-mini | Action execution |
-| CONVERSE | gpt-4o | Dialogue |
+| PLAN | gpt-5 | Action planning |
+| REFLECT | gpt-5 | Memory synthesis |
+| EXECUTE | gpt-5-mini | Action execution |
+| CONVERSE | gpt-5 | Dialogue |
 
 **Environment-Based Configuration**:
 ```bash
@@ -152,7 +152,7 @@ Models are configured in `src/generative_agents/backend/config.py` via the `Mode
 MODEL_PRESET=economy
 
 # Override individual models
-MODEL_REFLECT=gpt-4o-mini
+MODEL_REFLECT=gpt-5-mini
 MODEL_RETRIEVE_EMBEDDING=text-embedding-3-small
 ```
 

@@ -9,10 +9,9 @@ from unittest.mock import patch, MagicMock
 @pytest.fixture
 def mock_env():
     """Set up mock environment variables."""
-    with patch.dict(os.environ, {
-        "OPENAI_API_KEY": "test-key",
-        "KEY_OWNER": "test-owner"
-    }):
+    with patch.dict(
+        os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}
+    ):
         yield
 
 
@@ -28,25 +27,27 @@ def test_gpt_structure_functions_use_configured_models(mock_env):
     )
 
     # Mock the OpenAI client
-    with patch('generative_agents.backend.persona.prompt_template.gpt_structure.client') as mock_client:
+    with patch(
+        "generative_agents.backend.persona.prompt_template.gpt_structure.client"
+    ) as mock_client:
         # Setup mock responses
         mock_completion = MagicMock()
-        mock_completion.choices = [MagicMock(message=MagicMock(content="test response"))]
+        mock_completion.choices = [
+            MagicMock(message=MagicMock(content="test response"))
+        ]
         mock_client.chat.completions.create.return_value = mock_completion
 
         # Test ChatGPT_request uses MODEL_PLAN
         result = ChatGPT_request("test prompt")
         mock_client.chat.completions.create.assert_called_with(
-            model=MODEL_PLAN,
-            messages=[{"role": "user", "content": "test prompt"}]
+            model=MODEL_PLAN, messages=[{"role": "user", "content": "test prompt"}]
         )
         assert result == "test response"
 
         # Test GPT4_request uses MODEL_REFLECT
         result = GPT4_request("test prompt")
         mock_client.chat.completions.create.assert_called_with(
-            model=MODEL_REFLECT,
-            messages=[{"role": "user", "content": "test prompt"}]
+            model=MODEL_REFLECT, messages=[{"role": "user", "content": "test prompt"}]
         )
         assert result == "test response"
 
@@ -57,8 +58,7 @@ def test_gpt_structure_functions_use_configured_models(mock_env):
 
         result = get_embedding("test text")
         mock_client.embeddings.create.assert_called_with(
-            input=["test text"],
-            model=MODEL_RETRIEVE_EMBEDDING
+            input=["test text"], model=MODEL_RETRIEVE_EMBEDDING
         )
         assert result == [0.1, 0.2, 0.3]
 
@@ -67,9 +67,9 @@ def test_gpt_structure_functions_use_configured_models(mock_env):
 def clean_imports():
     """Clean up imports before and after test."""
     modules_to_clean = [
-        'generative_agents.backend.config',
-        'generative_agents.backend.utils',
-        'generative_agents.backend.persona.prompt_template.gpt_structure',
+        "generative_agents.backend.config",
+        "generative_agents.backend.utils",
+        "generative_agents.backend.persona.prompt_template.gpt_structure",
     ]
     # Clean before test
     for module in modules_to_clean:
@@ -86,15 +86,23 @@ def test_model_preset_configuration(clean_imports):
     # it will use the correct preset. In production, you'd restart the server.
 
     # Set economy preset BEFORE importing
-    with patch.dict(os.environ, {
-        "OPENAI_API_KEY": "test-key",
-        "KEY_OWNER": "test-owner",
-        "MODEL_PRESET": "economy"
-    }, clear=True):
+    with patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test-key",
+            "KEY_OWNER": "test-owner",
+            "MODEL_PRESET": "economy",
+        },
+        clear=True,
+    ):
         # Now import with economy preset
         from generative_agents.backend.config import model_config
 
         # Verify economy models are loaded
-        assert model_config.PLAN == "gpt-4o-mini"  # Economy uses gpt-4o-mini for planning
-        assert model_config.RETRIEVE_EMBEDDING == "text-embedding-3-small"  # Economy uses small embeddings
-        assert model_config.REFLECT == "gpt-4o"  # Even economy keeps reflection high quality
+        assert model_config.PLAN == "gpt-5-mini"  # Economy uses gpt-5-mini for planning
+        assert (
+            model_config.RETRIEVE_EMBEDDING == "text-embedding-3-small"
+        )  # Economy uses small embeddings
+        assert (
+            model_config.REFLECT == "gpt-5-mini"
+        )  # Economy uses gpt-5-mini for reflection
