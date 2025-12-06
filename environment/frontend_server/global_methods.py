@@ -179,7 +179,7 @@ def find_filenames(path_to_dir, suffix=".csv"):
     """
     filenames = listdir(path_to_dir)
     return [
-        f"{path_to_dir}/{filename}"
+        os.path.join(path_to_dir, filename)
         for filename in filenames
         if filename.endswith(suffix)
     ]

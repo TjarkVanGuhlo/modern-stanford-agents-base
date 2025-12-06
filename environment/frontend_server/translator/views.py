@@ -47,7 +47,6 @@ def demo(request, sim_code, step, play_speed="2"):
         raw_all_movement = json.load(json_file)
 
     # Loading all names of the personas
-    persona_names = {}
     persona_names = []
     persona_names_set = set()
     for p in list(raw_all_movement["0"].keys()):

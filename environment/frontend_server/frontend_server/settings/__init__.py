@@ -19,7 +19,7 @@ try:
     from .local import *
 
     live = False
-except Exception:
+except ImportError:
     live = True
 
 if live:
