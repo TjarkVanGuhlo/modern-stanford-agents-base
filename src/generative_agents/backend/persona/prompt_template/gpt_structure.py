@@ -302,9 +302,7 @@ if __name__ == '__main__':
   def __func_validate(gpt_response):
     if len(gpt_response.strip()) <= 1:
       return False
-    if len(gpt_response.strip().split(" ")) > 1:
-      return False
-    return True
+    return len(gpt_response.strip().split(" ")) <= 1
   def __func_clean_up(gpt_response):
     cleaned_response = gpt_response.strip()
     return cleaned_response
