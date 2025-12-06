@@ -19,7 +19,7 @@ try:
     from .local import *
 
     live = False
-except:
+except Exception:
     live = True
 
 if live:

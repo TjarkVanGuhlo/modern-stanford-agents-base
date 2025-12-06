@@ -31,7 +31,7 @@ def demo(request, sim_code, step, play_speed="2"):
         play_speed = play_speed_opt[play_speed]
 
     # Loading the basic meta information about the simulation.
-    meta = dict()
+    meta = {}
     with open(meta_file) as json_file:
         meta = json.load(json_file)
 
@@ -44,12 +44,12 @@ def demo(request, sim_code, step, play_speed="2"):
     start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S")
 
     # Loading the movement file
-    raw_all_movement = dict()
+    raw_all_movement = {}
     with open(move_file) as json_file:
         raw_all_movement = json.load(json_file)
 
     # Loading all names of the personas
-    persona_names = dict()
+    persona_names = {}
     persona_names = []
     persona_names_set = set()
     for p in list(raw_all_movement["0"].keys()):
@@ -66,19 +66,19 @@ def demo(request, sim_code, step, play_speed="2"):
     # frontend. Whereas we use ajax scheme to communicate steps to the frontend
     # during the simulation stage, for this demo, we send all movement
     # information in one step.
-    all_movement = dict()
+    all_movement = {}
 
     # Preparing the initial step.
     # <init_prep> sets the locations and descriptions of all agents at the
     # beginning of the demo determined by <step>.
-    init_prep = dict()
+    init_prep = {}
     for int_key in range(step + 1):
         key = str(int_key)
         val = raw_all_movement[key]
         for p in persona_names_set:
             if p in val:
                 init_prep[p] = val[p]
-    persona_init_pos = dict()
+    persona_init_pos = {}
     for p in persona_names_set:
         persona_init_pos[p.replace(" ", "_")] = init_prep[p]["movement"]
     all_movement[step] = init_prep
@@ -206,13 +206,13 @@ def replay_persona_state(request, sim_code, step, persona_name):
             f"compressed_storage/{sim_code}/personas/{persona_name}/bootstrap_memory"
         )
 
-    with open(memory + "/scratch.json") as json_file:
+    with open(f"{memory}/scratch.json") as json_file:
         scratch = json.load(json_file)
 
-    with open(memory + "/spatial_memory.json") as json_file:
+    with open(f"{memory}/spatial_memory.json") as json_file:
         spatial = json.load(json_file)
 
-    with open(memory + "/associative_memory/nodes.json") as json_file:
+    with open(f"{memory}/associative_memory/nodes.json") as json_file:
         associative = json.load(json_file)
 
     a_mem_event = []
