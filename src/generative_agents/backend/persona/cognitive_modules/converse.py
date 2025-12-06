@@ -205,6 +205,26 @@ def agent_chat_v2(maze, init_persona, target_persona):
     return curr_chat
 
 
+def generate_convo_summary(init_persona, convo: list[list[str]]) -> str:
+    """
+    Generate a summary of a conversation for use as an action description.
+
+    INPUT:
+      init_persona: The persona who initiated the conversation
+      convo: List of [speaker, utterance] pairs
+    OUTPUT:
+      A brief summary string describing the conversation topic
+    """
+    if not convo:
+        return "had a conversation"
+
+    topic = convo[0][1][:50] if convo[0][1] else "various topics"
+    if len(topic) >= 50:
+        topic = f"{topic[:47]}..."
+
+    return f"conversing about {topic}"
+
+
 def generate_summarize_ideas(persona, nodes, question):
     statements = "".join(f"{n.embedding_key}\n" for n in nodes)
     return run_gpt_prompt_summarize_ideas(persona, statements, question)[0]

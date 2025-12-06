@@ -88,10 +88,18 @@ def execute(persona, maze, personas, plan):
             target_tiles = maze.address_tiles[plan]
             target_tiles = random.sample(list(target_tiles), 1)
 
-        elif plan not in maze.address_tiles:
-            maze.address_tiles["Johnson Park:park:park garden"]  # ERRORRRRRRR
-        else:
+        elif plan in maze.address_tiles:
             target_tiles = maze.address_tiles[plan]
+        # else: plan not in maze.address_tiles - target_tiles remains None
+
+        # Guard clause: if no target tiles found, fall back to current position
+        if target_tiles is None:
+            if persona.scratch.curr_tile is None:
+                # Cannot navigate without a current position - skip movement
+                persona.scratch.planned_path = []
+                persona.scratch.act_path_set = True
+                return persona.scratch.curr_tile
+            target_tiles = [persona.scratch.curr_tile]
 
         # There are sometimes more than one tile returned from this (e.g., a tabe
         # may stretch many coordinates). So, we sample a few here. And from that
@@ -136,7 +144,7 @@ def execute(persona, maze, personas, plan):
                 path = curr_path
         # Actually setting the <planned_path> and <act_path_set>. We cut the
         # first element in the planned_path because it includes the curr_tile.
-        persona.scratch.planned_path = path[1:]
+        persona.scratch.planned_path = path[1:] if path else []
         persona.scratch.act_path_set = True
 
     # Setting up the next immediate step. We stay at our curr_tile if there is

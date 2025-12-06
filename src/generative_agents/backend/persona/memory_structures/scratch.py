@@ -12,6 +12,13 @@ from generative_agents.backend.global_methods import check_if_file_exists
 
 
 class Scratch:
+    # Type annotations for instance attributes
+    curr_time: datetime.datetime | None
+    curr_tile: tuple[int, int] | None
+    act_start_time: datetime.datetime | None
+    act_duration: int | None
+    chatting_end_time: datetime.datetime | None
+
     def __init__(self, f_saved):
         # PERSONA HYPERPARAMETERS
         # <vision_r> denotes the number of tiles that the persona can see around
@@ -24,9 +31,9 @@ class Scratch:
 
         # WORLD INFORMATION
         # Perceived world time.
-        self.curr_time = None
+        self.curr_time: datetime.datetime | None = None
         # Current x,y tile coordinate of the persona.
-        self.curr_tile = None
+        self.curr_tile: tuple[int, int] | None = None
         # Perceived world daily requirement.
         self.daily_plan_req = None
 
@@ -113,10 +120,10 @@ class Scratch:
         self.act_address = None
         # <start_time> is a python datetime instance that indicates when the
         # action has started.
-        self.act_start_time = None
+        self.act_start_time: datetime.datetime | None = None
         # <duration> is the integer value that indicates the number of minutes an
         # action is meant to last.
-        self.act_duration = None
+        self.act_duration: int | None = None
         # <description> is a string description of the action.
         self.act_description = None
         # <pronunciatio> is the descriptive expression of the self.description.
@@ -250,7 +257,9 @@ class Scratch:
         scratch["att_bandwidth"] = self.att_bandwidth
         scratch["retention"] = self.retention
 
-        scratch["curr_time"] = self.curr_time.strftime("%B %d, %Y, %H:%M:%S")
+        scratch["curr_time"] = (
+            self.curr_time.strftime("%B %d, %Y, %H:%M:%S") if self.curr_time else ""
+        )
         scratch["curr_tile"] = self.curr_tile
         scratch["daily_plan_req"] = self.daily_plan_req
 
@@ -285,7 +294,11 @@ class Scratch:
         scratch["f_daily_schedule_hourly_org"] = self.f_daily_schedule_hourly_org
 
         scratch["act_address"] = self.act_address
-        scratch["act_start_time"] = self.act_start_time.strftime("%B %d, %Y, %H:%M:%S")
+        scratch["act_start_time"] = (
+            self.act_start_time.strftime("%B %d, %Y, %H:%M:%S")
+            if self.act_start_time
+            else ""
+        )
         scratch["act_duration"] = self.act_duration
         scratch["act_description"] = self.act_description
         scratch["act_pronunciatio"] = self.act_pronunciatio
@@ -330,8 +343,9 @@ class Scratch:
         """
         # We first calculate teh number of minutes elapsed today.
         today_min_elapsed = 0
-        today_min_elapsed += self.curr_time.hour * 60
-        today_min_elapsed += self.curr_time.minute
+        if self.curr_time:
+            today_min_elapsed += self.curr_time.hour * 60
+            today_min_elapsed += self.curr_time.minute
         today_min_elapsed += advance
 
         # We then calculate the current index based on that.
@@ -358,8 +372,9 @@ class Scratch:
         """
         # We first calculate teh number of minutes elapsed today.
         today_min_elapsed = 0
-        today_min_elapsed += self.curr_time.hour * 60
-        today_min_elapsed += self.curr_time.minute
+        if self.curr_time:
+            today_min_elapsed += self.curr_time.hour * 60
+            today_min_elapsed += self.curr_time.minute
         today_min_elapsed += advance
         # We then calculate the current index based on that.
         curr_index = 0
@@ -402,7 +417,8 @@ class Scratch:
         commonset += f"Currently: {self.currently}\n"
         commonset += f"Lifestyle: {self.lifestyle}\n"
         commonset += f"Daily plan requirement: {self.daily_plan_req}\n"
-        commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
+        if self.curr_time:
+            commonset += f"Current Date: {self.curr_time.strftime('%A %B %d')}\n"
         return commonset
 
     def get_str_name(self):
@@ -433,7 +449,7 @@ class Scratch:
         return self.daily_plan_req
 
     def get_str_curr_date_str(self):
-        return self.curr_time.strftime("%A %B %d")
+        return self.curr_time.strftime("%A %B %d") if self.curr_time else ""
 
     def get_curr_event(self):
         return self.act_event if self.act_address else (self.name, None, None)
@@ -507,7 +523,7 @@ class Scratch:
         EXAMPLE STR OUTPUT
           "14:05 P.M."
         """
-        return self.act_start_time.strftime("%H:%M %p")
+        return self.act_start_time.strftime("%H:%M %p") if self.act_start_time else ""
 
     def act_check_finished(self):
         """
@@ -527,11 +543,15 @@ class Scratch:
             end_time = self.chatting_end_time
         else:
             x = self.act_start_time
+            if x is None or self.act_duration is None:
+                return True  # No valid action timing, consider finished
             if x.second != 0:
                 x = x.replace(second=0)
                 x = x + datetime.timedelta(minutes=1)
             end_time = x + datetime.timedelta(minutes=self.act_duration)
 
+        if end_time is None or self.curr_time is None:
+            return True
         return end_time.strftime("%H:%M:%S") == self.curr_time.strftime("%H:%M:%S")
 
     def act_summarize(self):
@@ -562,7 +582,11 @@ class Scratch:
         OUTPUT
           ret: A human readable summary of the action.
         """
-        start_datetime_str = self.act_start_time.strftime("%A %B %d -- %H:%M %p")
+        start_datetime_str = (
+            self.act_start_time.strftime("%A %B %d -- %H:%M %p")
+            if self.act_start_time
+            else "Unknown time"
+        )
         ret = f"[{start_datetime_str}]\n"
         ret += f"Activity: {self.name} is {self.act_description}\n"
         ret += f"Address: {self.act_address}\n"

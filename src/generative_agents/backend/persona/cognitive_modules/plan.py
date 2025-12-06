@@ -889,44 +889,24 @@ def _create_react(
 ):
     p = persona
 
-    min_sum = sum(
-        p.scratch.f_daily_schedule_hourly_org[i][1]
-        for i in range(p.scratch.get_f_daily_schedule_hourly_org_index())
-    )
+    # Guard: ensure hourly schedule exists before accessing
+    hourly_org = p.scratch.f_daily_schedule_hourly_org
+    if not hourly_org:
+        return
+
+    curr_index = p.scratch.get_f_daily_schedule_hourly_org_index()
+
+    min_sum = sum(hourly_org[i][1] for i in range(curr_index))
     start_hour = int(min_sum / 60)
 
-    if (
-        p.scratch.f_daily_schedule_hourly_org[
-            p.scratch.get_f_daily_schedule_hourly_org_index()
-        ][1]
-        >= 120
-    ):
-        end_hour = (
-            start_hour
-            + p.scratch.f_daily_schedule_hourly_org[
-                p.scratch.get_f_daily_schedule_hourly_org_index()
-            ][1]
-            / 60
-        )
+    if hourly_org[curr_index][1] >= 120:
+        end_hour = start_hour + hourly_org[curr_index][1] / 60
 
-    elif (
-        p.scratch.f_daily_schedule_hourly_org[
-            p.scratch.get_f_daily_schedule_hourly_org_index()
-        ][1]
-        + p.scratch.f_daily_schedule_hourly_org[
-            p.scratch.get_f_daily_schedule_hourly_org_index() + 1
-        ][1]
+    elif curr_index + 1 < len(hourly_org) and (
+        hourly_org[curr_index][1] + hourly_org[curr_index + 1][1]
     ):
         end_hour = start_hour + (
-            (
-                p.scratch.f_daily_schedule_hourly_org[
-                    p.scratch.get_f_daily_schedule_hourly_org_index()
-                ][1]
-                + p.scratch.f_daily_schedule_hourly_org[
-                    p.scratch.get_f_daily_schedule_hourly_org_index() + 1
-                ][1]
-            )
-            / 60
+            (hourly_org[curr_index][1] + hourly_org[curr_index + 1][1]) / 60
         )
 
     else:

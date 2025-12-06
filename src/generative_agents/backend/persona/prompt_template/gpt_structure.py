@@ -7,6 +7,7 @@ Description: Wrapper functions for calling OpenAI APIs.
 
 import json
 import time
+from collections.abc import Callable
 from pathlib import Path
 
 from openai import OpenAI
@@ -107,15 +108,15 @@ def ChatGPT_request(prompt):
 
 
 def GPT4_safe_generate_response(
-    prompt,
-    example_output,
-    special_instruction,
-    repeat=3,
-    fail_safe_response="error",
-    func_validate=None,
-    func_clean_up=None,
-    verbose=False,
-):
+    prompt: str,
+    example_output: str,
+    special_instruction: str,
+    repeat: int = 3,
+    fail_safe_response: str = "error",
+    func_validate: Callable[..., bool] | None = None,
+    func_clean_up: Callable[..., str] | None = None,
+    verbose: bool = False,
+) -> str | bool:
     prompt = 'GPT-3 Prompt:\n"""\n' + prompt + '\n"""\n'
     prompt += (
         f"Output the response to the prompt above in json. {special_instruction}\n"
@@ -134,8 +135,10 @@ def GPT4_safe_generate_response(
             curr_gpt_response = curr_gpt_response[:end_index]
             curr_gpt_response = json.loads(curr_gpt_response)["output"]
 
-            if func_validate(curr_gpt_response, prompt=prompt):
-                return func_clean_up(curr_gpt_response, prompt=prompt)
+            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+                if func_clean_up is not None:
+                    return func_clean_up(curr_gpt_response, prompt=prompt)
+                return curr_gpt_response
 
             if verbose:
                 print("---- repeat count: \n", i, curr_gpt_response)
@@ -149,15 +152,15 @@ def GPT4_safe_generate_response(
 
 
 def ChatGPT_safe_generate_response(
-    prompt,
-    example_output,
-    special_instruction,
-    repeat=3,
-    fail_safe_response="error",
-    func_validate=None,
-    func_clean_up=None,
-    verbose=False,
-):
+    prompt: str,
+    example_output: str,
+    special_instruction: str,
+    repeat: int = 3,
+    fail_safe_response: str = "error",
+    func_validate: Callable[..., bool] | None = None,
+    func_clean_up: Callable[..., str] | None = None,
+    verbose: bool = False,
+) -> str | bool:
     # prompt = 'GPT-3 Prompt:\n"""\n' + prompt + '\n"""\n'
     prompt = '"""\n' + prompt + '\n"""\n'
     prompt += (
@@ -177,12 +180,10 @@ def ChatGPT_safe_generate_response(
             curr_gpt_response = curr_gpt_response[:end_index]
             curr_gpt_response = json.loads(curr_gpt_response)["output"]
 
-            # print ("---ashdfaf")
-            # print (curr_gpt_response)
-            # print ("000asdfhia")
-
-            if func_validate(curr_gpt_response, prompt=prompt):
-                return func_clean_up(curr_gpt_response, prompt=prompt)
+            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+                if func_clean_up is not None:
+                    return func_clean_up(curr_gpt_response, prompt=prompt)
+                return curr_gpt_response
 
             if verbose:
                 print("---- repeat count: \n", i, curr_gpt_response)
@@ -196,13 +197,13 @@ def ChatGPT_safe_generate_response(
 
 
 def ChatGPT_safe_generate_response_OLD(
-    prompt,
-    repeat=3,
-    fail_safe_response="error",
-    func_validate=None,
-    func_clean_up=None,
-    verbose=False,
-):
+    prompt: str,
+    repeat: int = 3,
+    fail_safe_response: str = "error",
+    func_validate: Callable[..., bool] | None = None,
+    func_clean_up: Callable[..., str] | None = None,
+    verbose: bool = False,
+) -> str:
     if verbose:
         print("CHAT GPT PROMPT")
         print(prompt)
@@ -210,8 +211,10 @@ def ChatGPT_safe_generate_response_OLD(
     for i in range(repeat):
         try:
             curr_gpt_response = ChatGPT_request(prompt).strip()
-            if func_validate(curr_gpt_response, prompt=prompt):
-                return func_clean_up(curr_gpt_response, prompt=prompt)
+            if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+                if func_clean_up is not None:
+                    return func_clean_up(curr_gpt_response, prompt=prompt)
+                return curr_gpt_response
             if verbose:
                 print(f"---- repeat count: {i}")
                 print(curr_gpt_response)
@@ -286,21 +289,23 @@ def generate_prompt(curr_input, prompt_lib_file):
 
 
 def safe_generate_response(
-    prompt,
-    gpt_parameter,
-    repeat=5,
-    fail_safe_response="error",
-    func_validate=None,
-    func_clean_up=None,
-    verbose=False,
-):
+    prompt: str,
+    gpt_parameter: dict,
+    repeat: int = 5,
+    fail_safe_response: str = "error",
+    func_validate: Callable[..., bool] | None = None,
+    func_clean_up: Callable[..., str] | None = None,
+    verbose: bool = False,
+) -> str:
     if verbose:
         print(prompt)
 
     for i in range(repeat):
         curr_gpt_response = GPT_request(prompt, gpt_parameter)
-        if func_validate(curr_gpt_response, prompt=prompt):
-            return func_clean_up(curr_gpt_response, prompt=prompt)
+        if func_validate is not None and func_validate(curr_gpt_response, prompt=prompt):
+            if func_clean_up is not None:
+                return func_clean_up(curr_gpt_response, prompt=prompt)
+            return curr_gpt_response
         if verbose:
             print("---- repeat count: ", i, curr_gpt_response)
             print(curr_gpt_response)
