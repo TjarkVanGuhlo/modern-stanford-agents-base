@@ -5,18 +5,18 @@ Author: Tjark Van Guhlo (Tjark@van-guhlo.com) for changes since 0.1.0
 File: reverie.py
 Description: This is the main program for running generative agent simulations
 that define the ReverieServer class. This class maintains and records all
-states related to the simulation. The primary mode of interaction for those  
-running the simulation should be through the open_server function, which  
-enables the simulator to input command-line prompts for running and saving  
+states related to the simulation. The primary mode of interaction for those
+running the simulation should be through the open_server function, which
+enables the simulator to input command-line prompts for running and saving
 the simulation, among other tasks.
 
-Release note (June 14, 2023) -- Reverie implements the core simulation 
-mechanism described in my paper entitled "Generative Agents: Interactive 
-Simulacra of Human Behavior." If you are reading through these lines after 
-having read the paper, you might notice that I use older terms to describe 
-generative agents and their cognitive modules here. Most notably, I use the 
-term "personas" to refer to generative agents, "associative memory" to refer 
-to the memory stream, and "reverie" to refer to the overarching simulation 
+Release note (June 14, 2023) -- Reverie implements the core simulation
+mechanism described in my paper entitled "Generative Agents: Interactive
+Simulacra of Human Behavior." If you are reading through these lines after
+having read the paper, you might notice that I use older terms to describe
+generative agents and their cognitive modules here. Most notably, I use the
+term "personas" to refer to generative agents, "associative memory" to refer
+to the memory stream, and "reverie" to refer to the overarching simulation
 framework.
 """
 
@@ -26,17 +26,18 @@ from typing import Any
 
 from generative_agents.backend.maze import *
 from generative_agents.backend.persona.persona import *
-from generative_agents.backend.persona.cognitive_modules.converse import load_history_via_whisper
+from generative_agents.backend.persona.cognitive_modules.converse import (
+    load_history_via_whisper,
+)
 
 
 ##############################################################################
 #                                  REVERIE                                   #
 ##############################################################################
 
+
 class ReverieServer:
-    def __init__(self,
-                 fork_sim_code,
-                 sim_code):
+    def __init__(self, fork_sim_code, sim_code):
         # FORKING FROM A PRIOR SIMULATION:
         # <fork_sim_code> indicates the simulation we are forking from.
         # Interestingly, all simulations must be forked from some initial
@@ -66,26 +67,27 @@ class ReverieServer:
         # "June 25, 2022"
         # e.g., ...strptime(June 25, 2022, "%B %d, %Y")
         self.start_time = datetime.datetime.strptime(
-            f"{reverie_meta['start_date']}, 00:00:00",
-            "%B %d, %Y, %H:%M:%S")
+            f"{reverie_meta['start_date']}, 00:00:00", "%B %d, %Y, %H:%M:%S"
+        )
         # <curr_time> is the datetime instance that indicates the game's current
         # time. This gets incremented by <sec_per_step> amount everytime the world
         # progresses (that is, everytime curr_env_file is received).
-        self.curr_time = datetime.datetime.strptime(reverie_meta['curr_time'],
-                                                    "%B %d, %Y, %H:%M:%S")
+        self.curr_time = datetime.datetime.strptime(
+            reverie_meta["curr_time"], "%B %d, %Y, %H:%M:%S"
+        )
         # <sec_per_step> denotes the number of seconds in game time that each
         # step moves forward.
-        self.sec_per_step = reverie_meta['sec_per_step']
+        self.sec_per_step = reverie_meta["sec_per_step"]
 
         # <maze> is the main Maze instance. Note that we pass in the maze_name
         # (e.g., "double_studio") to instantiate Maze.
         # e.g., Maze("double_studio")
-        self.maze = Maze(reverie_meta['maze_name'])
+        self.maze = Maze(reverie_meta["maze_name"])
 
         # <step> denotes the number of steps that our game has taken. A step here
         # literally translates to the number of moves our personas made with respect
         # to the number of tiles.
-        self.step = reverie_meta['step']
+        self.step = reverie_meta["step"]
 
         # SETTING UP PERSONAS IN REVERIE
         # <personas> is a dictionary that takes the persona's full name as its
@@ -115,7 +117,7 @@ class ReverieServer:
         # Loading in all personas.
         init_env_file = f"{self.sim_folder}/environment/{str(self.step)}.json"
         init_env = json.load(open(init_env_file))
-        for persona_name in reverie_meta['persona_names']:
+        for persona_name in reverie_meta["persona_names"]:
             persona_folder = f"{self.sim_folder}/personas/{persona_name}"
             p_x = init_env[persona_name]["x"]
             p_y = init_env[persona_name]["y"]
@@ -123,8 +125,9 @@ class ReverieServer:
 
             self.personas[persona_name] = curr_persona
             self.personas_tile[persona_name] = (p_x, p_y)
-            self.maze.tiles[p_y][p_x]["events"].add(curr_persona.scratch
-                                                    .get_curr_event_and_desc())
+            self.maze.tiles[p_y][p_x]["events"].add(
+                curr_persona.scratch.get_curr_event_and_desc()
+            )
 
         # REVERIE SETTINGS PARAMETERS:
         # <server_sleep> denotes the amount of time that our while loop rests each
@@ -165,7 +168,7 @@ class ReverieServer:
             "sec_per_step": self.sec_per_step,
             "maze_name": self.maze.maze_name,
             "persona_names": list(self.personas.keys()),
-            "step": self.step
+            "step": self.step,
         }
         reverie_meta_f = f"{self.sim_folder}/reverie/meta.json"
         with open(reverie_meta_f, "w") as outfile:
@@ -225,8 +228,10 @@ class ReverieServer:
 
                     # Current camera location
                     curr_sts = self.maze.sq_tile_size
-                    curr_camera = (int(math.ceil(curr_dict["x"] / curr_sts)),
-                                   int(math.ceil(curr_dict["y"] / curr_sts)) + 1)
+                    curr_camera = (
+                        int(math.ceil(curr_dict["x"] / curr_sts)),
+                        int(math.ceil(curr_dict["y"] / curr_sts)) + 1,
+                    )
                     curr_tile_det = self.maze.access_tile(curr_camera)
 
                     # Initiating the s_mem
@@ -238,16 +243,27 @@ class ReverieServer:
                     nearby_tiles = self.maze.get_nearby_tiles(curr_camera, curr_vision)
                     for i in nearby_tiles:
                         i_det = self.maze.access_tile(i)
-                        if (curr_tile_det["sector"] == i_det["sector"]
-                                and curr_tile_det["arena"] == i_det["arena"]):
-                            if i_det["sector"] != "" and i_det["sector"] not in s_mem[world]:
+                        if (
+                            curr_tile_det["sector"] == i_det["sector"]
+                            and curr_tile_det["arena"] == i_det["arena"]
+                        ):
+                            if (
+                                i_det["sector"] != ""
+                                and i_det["sector"] not in s_mem[world]
+                            ):
                                 s_mem[world][i_det["sector"]] = {}
-                            if i_det["arena"] != "" and i_det["arena"] not in s_mem[world][i_det["sector"]]:
+                            if (
+                                i_det["arena"] != ""
+                                and i_det["arena"] not in s_mem[world][i_det["sector"]]
+                            ):
                                 s_mem[world][i_det["sector"]][i_det["arena"]] = []
-                            if i_det["game_object"] != "" and (i_det["game_object"]
-                                                               not in s_mem[world][i_det["sector"]][i_det["arena"]]):
+                            if i_det["game_object"] != "" and (
+                                i_det["game_object"]
+                                not in s_mem[world][i_det["sector"]][i_det["arena"]]
+                            ):
                                 s_mem[world][i_det["sector"]][i_det["arena"]] += [
-                                    i_det["game_object"]]
+                                    i_det["game_object"]
+                                ]
 
                 # Incrementally outputting the s_mem and saving the JSON file.
                 print("= " * 15)
@@ -309,36 +325,46 @@ class ReverieServer:
                         curr_tile = self.personas_tile[persona_name]
                         # <new_tile> is the tile that the persona will move to right now,
                         # during this cycle.
-                        new_tile = (new_env[persona_name]["x"],
-                                    new_env[persona_name]["y"])
+                        new_tile = (
+                            new_env[persona_name]["x"],
+                            new_env[persona_name]["y"],
+                        )
 
                         # We actually move the persona on the backend tile map here.
                         self.personas_tile[persona_name] = new_tile
-                        self.maze.remove_subject_events_from_tile(persona.name, curr_tile)
-                        self.maze.add_event_from_tile(persona.scratch
-                                                      .get_curr_event_and_desc(), new_tile)
+                        self.maze.remove_subject_events_from_tile(
+                            persona.name, curr_tile
+                        )
+                        self.maze.add_event_from_tile(
+                            persona.scratch.get_curr_event_and_desc(), new_tile
+                        )
 
                         # Now, the persona will travel to get to their destination. *Once*
                         # the persona gets there, we activate the object action.
                         if not persona.scratch.planned_path:
                             # We add that new object action event to the backend tile map.
                             # At its creation, it is stored in the persona's backend.
-                            game_obj_cleanup[persona.scratch
-                            .get_curr_obj_event_and_desc()] = new_tile
-                            self.maze.add_event_from_tile(persona.scratch
-                                                          .get_curr_obj_event_and_desc(), new_tile)
+                            game_obj_cleanup[
+                                persona.scratch.get_curr_obj_event_and_desc()
+                            ] = new_tile
+                            self.maze.add_event_from_tile(
+                                persona.scratch.get_curr_obj_event_and_desc(), new_tile
+                            )
                             # We also need to remove the temporary blank action for the
                             # object that is currently taking the action.
-                            blank = (persona.scratch.get_curr_obj_event_and_desc()[0],
-                                     None, None, None)
+                            blank = (
+                                persona.scratch.get_curr_obj_event_and_desc()[0],
+                                None,
+                                None,
+                                None,
+                            )
                             self.maze.remove_event_from_tile(blank, new_tile)
 
                     # Then we need to actually have each of the personas perceive and
                     # move. The movement for each of the personas comes in the form of
                     # x y coordinates where the persona will move towards. e.g., (50, 34)
                     # This is where the core brains of the personas are invoked.
-                    movements = {"persona": {},
-                                 "meta": {}}
+                    movements = {"persona": {}, "meta": {}}
                     for persona_name, persona in self.personas.items():
                         # <next_tile> is an x,y coordinate. e.g., (58, 9)
                         # <pronunciation> is an emoji. e.g., "\ud83d\udca4"
@@ -346,8 +372,11 @@ class ReverieServer:
                         #   writing her next novel (editing her novel)
                         #   @ double studio:double studio:common room:sofa
                         next_tile, pronunciation, description = persona.move(
-                            self.maze, self.personas, self.personas_tile[persona_name],
-                            self.curr_time)
+                            self.maze,
+                            self.personas,
+                            self.personas_tile[persona_name],
+                            self.curr_time,
+                        )
                         movements["persona"][persona_name] = {
                             "movement": next_tile,
                             "pronunciation": pronunciation,
@@ -356,8 +385,9 @@ class ReverieServer:
                         }
                     # Include the meta-information about the current stage in the
                     # movements' dictionary.
-                    movements["meta"]["curr_time"] = (self.curr_time
-                                                      .strftime("%B %d, %Y, %H:%M:%S"))
+                    movements["meta"]["curr_time"] = self.curr_time.strftime(
+                        "%B %d, %Y, %H:%M:%S"
+                    )
 
                     # We then write the personas' movements to a file that will be sent
                     # to the frontend server.
@@ -431,42 +461,44 @@ class ReverieServer:
                     int_count = int(sim_command.split()[-1])
                     self.start_server(int_count)
 
-                elif ("print persona schedule"
-                      in sim_command[:22].lower()):
+                elif "print persona schedule" in sim_command[:22].lower():
                     # Print the decomposed schedule of the persona specified in the
                     # prompt.
                     # Example: print persona schedule Isabella Rodriguez
-                    ret_str += (self.personas[" ".join(sim_command.split()[-2:])]
-                                .scratch.get_str_daily_schedule_summary())
+                    ret_str += self.personas[
+                        " ".join(sim_command.split()[-2:])
+                    ].scratch.get_str_daily_schedule_summary()
 
-                elif ("print all persona schedule"
-                      in sim_command[:26].lower()):
+                elif "print all persona schedule" in sim_command[:26].lower():
                     # Print the decomposed schedule of all personas in the world.
                     # Example: print all persona schedule
                     for persona_name, persona in self.personas.items():
                         ret_str += f"{persona_name}\n"
-                        ret_str += f"{persona.scratch.get_str_daily_schedule_summary()}\n"
-                        ret_str += f"---\n"
+                        ret_str += (
+                            f"{persona.scratch.get_str_daily_schedule_summary()}\n"
+                        )
+                        ret_str += "---\n"
 
-                elif ("print hourly org persona schedule"
-                      in sim_command.lower()):
+                elif "print hourly org persona schedule" in sim_command.lower():
                     # Print the hourly schedule of the persona specified in the prompt.
                     # This one shows the original, non-decomposed version of the
                     # schedule.
                     # Ex: print persona schedule Isabella Rodriguez
-                    ret_str += (self.personas[" ".join(sim_command.split()[-2:])]
-                                .scratch.get_str_daily_schedule_hourly_org_summary())
+                    ret_str += self.personas[
+                        " ".join(sim_command.split()[-2:])
+                    ].scratch.get_str_daily_schedule_hourly_org_summary()
 
-                elif ("print persona current tile"
-                      in sim_command[:26].lower()):
+                elif "print persona current tile" in sim_command[:26].lower():
                     # Print the x y tile coordinate of the persona specified in the
                     # prompt.
                     # Ex: print persona current tile Isabella Rodriguez
-                    ret_str += str(self.personas[" ".join(sim_command.split()[-2:])]
-                                   .scratch.curr_tile)
+                    ret_str += str(
+                        self.personas[
+                            " ".join(sim_command.split()[-2:])
+                        ].scratch.curr_tile
+                    )
 
-                elif ("print persona chatting with buffer"
-                      in sim_command.lower()):
+                elif "print persona chatting with buffer" in sim_command.lower():
                     # Print the chatting with a buffer of the persona specified in the
                     # prompt.
                     # Ex: print persona chatting with buffer Isabella Rodriguez
@@ -474,79 +506,77 @@ class ReverieServer:
                     for p_n, count in curr_persona.scratch.chatting_with_buffer.items():
                         ret_str += f"{p_n}: {count}"
 
-                elif ("print persona associative memory (event)"
-                      in sim_command.lower()):
+                elif "print persona associative memory (event)" in sim_command.lower():
                     # Print the associative memory (event) of the persona specified in
                     # the prompt
                     # Ex: print persona associative memory (event) Isabella Rodriguez
-                    ret_str += f'{self.personas[" ".join(sim_command.split()[-2:])]}\n'
-                    ret_str += (self.personas[" ".join(sim_command.split()[-2:])]
-                                .a_mem.get_str_seq_events())
+                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
+                    ret_str += self.personas[
+                        " ".join(sim_command.split()[-2:])
+                    ].a_mem.get_str_seq_events()
 
-                elif ("print persona associative memory (thought)"
-                      in sim_command.lower()):
+                elif (
+                    "print persona associative memory (thought)" in sim_command.lower()
+                ):
                     # Print the associative memory (thought) of the persona specified in
                     # the prompt
                     # Ex: print persona associative memory (thought) Isabella Rodriguez
-                    ret_str += f'{self.personas[" ".join(sim_command.split()[-2:])]}\n'
-                    ret_str += (self.personas[" ".join(sim_command.split()[-2:])]
-                                .a_mem.get_str_seq_thoughts())
+                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
+                    ret_str += self.personas[
+                        " ".join(sim_command.split()[-2:])
+                    ].a_mem.get_str_seq_thoughts()
 
-                elif ("print persona associative memory (chat)"
-                      in sim_command.lower()):
+                elif "print persona associative memory (chat)" in sim_command.lower():
                     # Print the associative memory (chat) of the persona specified in
                     # the prompt
                     # Ex: print persona associative memory (chat) Isabella Rodriguez
-                    ret_str += f'{self.personas[" ".join(sim_command.split()[-2:])]}\n'
-                    ret_str += (self.personas[" ".join(sim_command.split()[-2:])]
-                                .a_mem.get_str_seq_chats())
+                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
+                    ret_str += self.personas[
+                        " ".join(sim_command.split()[-2:])
+                    ].a_mem.get_str_seq_chats()
 
-                elif ("print persona spatial memory"
-                      in sim_command.lower()):
+                elif "print persona spatial memory" in sim_command.lower():
                     # Print the spatial memory of the persona specified in the prompt
                     # Ex: print persona spatial memory Isabella Rodriguez
                     self.personas[" ".join(sim_command.split()[-2:])].s_mem.print_tree()
 
-                elif ("print current time"
-                      in sim_command[:18].lower()):
+                elif "print current time" in sim_command[:18].lower():
                     # Print the current time of the world.
                     # Ex: print current time
-                    ret_str += f'{self.curr_time.strftime("%B %d, %Y, %H:%M:%S")}\n'
-                    ret_str += f'steps: {self.step}'
+                    ret_str += f"{self.curr_time.strftime('%B %d, %Y, %H:%M:%S')}\n"
+                    ret_str += f"steps: {self.step}"
 
-                elif ("print tile event"
-                      in sim_command[:16].lower()):
+                elif "print tile event" in sim_command[:16].lower():
                     # Print the tile events in the tile specified in the prompt
                     # Ex: print tile event 50, 30
                     coordinate = [int(i.strip()) for i in sim_command[16:].split(",")]
                     for i in self.maze.access_tile(coordinate)["events"]:
                         ret_str += f"{i}\n"
 
-                elif ("print tile details"
-                      in sim_command.lower()):
+                elif "print tile details" in sim_command.lower():
                     # Print the tile details of the tile specified in the prompt
                     # Ex: print tile event 50, 30
                     coordinate = [int(i.strip()) for i in sim_command[18:].split(",")]
                     for key, val in self.maze.access_tile(coordinate).items():
                         ret_str += f"{key}: {val}\n"
 
-                elif ("call -- analysis"
-                      in sim_command.lower()):
+                elif "call -- analysis" in sim_command.lower():
                     # Starts a stateless chat session with the agent. It does not save
                     # anything to the agent's memory.
                     # Ex: call -- analysis Isabella Rodriguez
-                    persona_name = sim_command[len("call -- analysis"):].strip()
+                    persona_name = sim_command[len("call -- analysis") :].strip()
                     self.personas[persona_name].open_convo_session("analysis")
 
-                elif ("call -- load history"
-                      in sim_command.lower()):
+                elif "call -- load history" in sim_command.lower():
                     curr_file = (
-                            f"{maze_assets_loc}/"
-                            + sim_command[len("call -- load history"):].strip()
+                        f"{maze_assets_loc}/"
+                        + sim_command[len("call -- load history") :].strip()
                     )
                     # call -- load history the_ville/agent_history_init_n3.csv
 
-                    rows = read_file_to_list(curr_file, header=True, strip_trail=True)[1]
+                    rows = read_file_to_list(curr_file, header=True, strip_trail=True)[
+                        1
+                    ]
                     clean_whispers = []
                     for row in rows:
                         agent_name = row[0].strip()
