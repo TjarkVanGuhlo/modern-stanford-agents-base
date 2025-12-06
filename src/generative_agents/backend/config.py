@@ -118,7 +118,7 @@ class ModelConfig:
 
         return config
 
-    def get_model_for_task(self, task_type: str) -> str:
+    def get_model_for_task(self, task_type: str | None) -> str:
         """Get the appropriate model for a cognitive task.
 
         Args:

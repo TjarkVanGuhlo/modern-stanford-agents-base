@@ -1,1 +1,1 @@
-from .models import *
+# No models registered for admin

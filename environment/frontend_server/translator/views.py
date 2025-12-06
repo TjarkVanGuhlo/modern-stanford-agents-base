@@ -9,9 +9,7 @@ import json
 import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from global_methods import *
-
-from .models import *
+from global_methods import check_if_file_exists, find_filenames
 
 
 def landing(request):
@@ -31,7 +29,7 @@ def demo(request, sim_code, step, play_speed="2"):
         play_speed = play_speed_opt[play_speed]
 
     # Loading the basic meta information about the simulation.
-    meta = dict()
+    meta = {}
     with open(meta_file) as json_file:
         meta = json.load(json_file)
 
@@ -44,12 +42,11 @@ def demo(request, sim_code, step, play_speed="2"):
     start_datetime = start_datetime.strftime("%Y-%m-%dT%H:%M:%S")
 
     # Loading the movement file
-    raw_all_movement = dict()
+    raw_all_movement = {}
     with open(move_file) as json_file:
         raw_all_movement = json.load(json_file)
 
     # Loading all names of the personas
-    persona_names = dict()
     persona_names = []
     persona_names_set = set()
     for p in list(raw_all_movement["0"].keys()):
@@ -66,19 +63,19 @@ def demo(request, sim_code, step, play_speed="2"):
     # frontend. Whereas we use ajax scheme to communicate steps to the frontend
     # during the simulation stage, for this demo, we send all movement
     # information in one step.
-    all_movement = dict()
+    all_movement = {}
 
     # Preparing the initial step.
     # <init_prep> sets the locations and descriptions of all agents at the
     # beginning of the demo determined by <step>.
-    init_prep = dict()
+    init_prep = {}
     for int_key in range(step + 1):
         key = str(int_key)
         val = raw_all_movement[key]
         for p in persona_names_set:
             if p in val:
                 init_prep[p] = val[p]
-    persona_init_pos = dict()
+    persona_init_pos = {}
     for p in persona_names_set:
         persona_init_pos[p.replace(" ", "_")] = init_prep[p]["movement"]
     all_movement[step] = init_prep
@@ -101,12 +98,6 @@ def demo(request, sim_code, step, play_speed="2"):
     template = "demo/demo.html"
 
     return render(request, template, context)
-
-
-def UIST_Demo(request):
-    return demo(
-        request, "March20_the_ville_n25_UIST_RUN-step-1-141", 2160, play_speed="3"
-    )
 
 
 def home(request):
@@ -200,19 +191,19 @@ def replay_persona_state(request, sim_code, step, persona_name):
 
     persona_name_underscore = persona_name
     persona_name = " ".join(persona_name.split("_"))
-    memory = f"storage/{sim_code}/personas/{persona_name}/bootstrap_memory"
+    memory = os.path.join("storage", sim_code, "personas", persona_name, "bootstrap_memory")
     if not os.path.exists(memory):
-        memory = (
-            f"compressed_storage/{sim_code}/personas/{persona_name}/bootstrap_memory"
+        memory = os.path.join(
+            "compressed_storage", sim_code, "personas", persona_name, "bootstrap_memory"
         )
 
-    with open(memory + "/scratch.json") as json_file:
+    with open(os.path.join(memory, "scratch.json")) as json_file:
         scratch = json.load(json_file)
 
-    with open(memory + "/spatial_memory.json") as json_file:
+    with open(os.path.join(memory, "spatial_memory.json")) as json_file:
         spatial = json.load(json_file)
 
-    with open(memory + "/associative_memory/nodes.json") as json_file:
+    with open(os.path.join(memory, "associative_memory", "nodes.json")) as json_file:
         associative = json.load(json_file)
 
     a_mem_event = []

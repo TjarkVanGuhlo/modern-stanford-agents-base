@@ -7,7 +7,6 @@ world in a 2-dimensional matrix.
 """
 
 import json
-import math
 from typing import TypedDict
 
 from generative_agents.backend.global_methods import read_file_to_list
@@ -194,23 +193,6 @@ class Maze:
                         self.address_tiles[add].add((j, i))
                     else:
                         self.address_tiles[add] = {(j, i)}
-
-    def turn_coordinate_to_tile(self, px_coordinate):
-        """
-        Turns a pixel coordinate to a tile coordinate.
-
-        INPUT
-          px_coordinate: The pixel coordinate of our interest. Comes in the x, y
-                         format.
-        OUTPUT
-          tile coordinate (x, y): The tile coordinate that corresponds to the
-                                  pixel coordinate.
-        EXAMPLE OUTPUT
-          Given (1600, 384), outputs (50, 12)
-        """
-        x = math.ceil(px_coordinate[0] / self.sq_tile_size)
-        y = math.ceil(px_coordinate[1] / self.sq_tile_size)
-        return (x, y)
 
     def access_tile(self, tile: tuple[int, int]) -> TileDetails:
         """
