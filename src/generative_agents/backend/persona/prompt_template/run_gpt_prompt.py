@@ -754,10 +754,10 @@ def run_gpt_prompt_action_arena(
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
-    print(output)
 
     if output not in accessible_arenas:
         output = random.choice(accessible_arenas) if accessible_arenas else fail_safe
+    print(output)
 
     if debug or verbose:
         print_run_prompts(
@@ -814,8 +814,8 @@ def run_gpt_prompt_action_game_object(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
 
-    if accessible_objects and output not in accessible_objects:
-        output = random.choice(accessible_objects)
+    if output not in accessible_objects:
+        output = random.choice(accessible_objects) if accessible_objects else fail_safe
 
     if debug or verbose:
         print_run_prompts(
