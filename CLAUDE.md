@@ -63,6 +63,18 @@ uv run pytest -k "model_config" -q
 uv run pytest -rP
 ```
 
+### Code Quality
+```bash
+# Lint and check code
+uv run ruff check src/
+
+# Format code
+uv run ruff format src/
+
+# Fix auto-fixable issues
+uv run ruff check --fix src/
+```
+
 ### Running the Simulation
 
 **Start Frontend Environment Server (Django):**
@@ -242,7 +254,6 @@ call -- load history the_ville/<file>.csv  # Batch load agent memories
 
 ## Version and Release Policy
 
-See `.junie/guidelines.md` for:
-- Tag naming conventions (must be `v<major>.<minor>.<patch>`)
-- Release numbering policy (no test releases; production only)
-- GitHub CLI setup for TjarkVanGuhlo account
+- Tag naming conventions: `v<major>.<minor>.<patch>` (e.g., `v0.1.14`)
+- Production releases only (no test releases)
+- Version is tracked in `pyproject.toml`
