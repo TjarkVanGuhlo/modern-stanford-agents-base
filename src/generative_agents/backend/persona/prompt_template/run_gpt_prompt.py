@@ -731,11 +731,7 @@ def run_gpt_prompt_action_arena(
     def get_accessible_arenas():
         sector_key = f"{act_world}:{act_sector}"
         accessible = persona.s_mem.get_str_accessible_sector_arenas(sector_key)
-        return [i.strip() for i in accessible.split(", ")] if accessible else []
-
-    def get_fail_safe():
-        arenas = get_accessible_arenas()
-        return arenas[0] if arenas else "main room"
+        return [i.strip() for i in accessible.split(",")] if accessible else []
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -753,13 +749,13 @@ def run_gpt_prompt_action_arena(
     )
     prompt = generate_prompt(prompt_input, prompt_template)
 
-    fail_safe = get_fail_safe()
+    accessible_arenas = get_accessible_arenas()
+    fail_safe = accessible_arenas[0] if accessible_arenas else "main room"
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
     print(output)
 
-    accessible_arenas = get_accessible_arenas()
     if output not in accessible_arenas:
         output = random.choice(accessible_arenas) if accessible_arenas else fail_safe
 
@@ -794,11 +790,7 @@ def run_gpt_prompt_action_game_object(
 
     def get_accessible_game_objects():
         accessible = persona.s_mem.get_str_accessible_arena_game_objects(temp_address)
-        return [i.strip() for i in accessible.split(", ")] if accessible else []
-
-    def get_fail_safe():
-        game_objects = get_accessible_game_objects()
-        return game_objects[0] if game_objects else "bed"
+        return [i.strip() for i in accessible.split(",")] if accessible else []
 
     gpt_param = {
         "engine": "text-davinci-003",
@@ -816,12 +808,12 @@ def run_gpt_prompt_action_game_object(
     )
     prompt = generate_prompt(prompt_input, prompt_template)
 
-    fail_safe = get_fail_safe()
+    accessible_objects = get_accessible_game_objects()
+    fail_safe = accessible_objects[0] if accessible_objects else "bed"
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
 
-    accessible_objects = get_accessible_game_objects()
     if accessible_objects and output not in accessible_objects:
         output = random.choice(accessible_objects)
 
