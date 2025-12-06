@@ -9,9 +9,7 @@ import json
 import datetime
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from global_methods import *
-
-from .models import *
+from global_methods import check_if_file_exists, find_filenames
 
 
 def landing(request):

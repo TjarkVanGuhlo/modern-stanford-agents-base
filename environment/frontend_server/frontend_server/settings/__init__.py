@@ -12,7 +12,7 @@
 
 ###FOR GENERAL USES
 
-
+# ruff: noqa: F403 - Star imports are idiomatic for Django settings
 from .base import *
 
 try:
