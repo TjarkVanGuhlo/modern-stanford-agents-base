@@ -147,7 +147,7 @@ def get_row_len(curr_file):
             for row in data_reader:
                 analysis_set.add(row[0])
         return len(analysis_set)
-    except (OSError, FileNotFoundError):
+    except (OSError, IndexError):
         return False
 
 
@@ -164,7 +164,7 @@ def check_if_file_exists(curr_file):
         with open(curr_file):
             pass
         return True
-    except (OSError, FileNotFoundError):
+    except OSError:
         return False
 
 
