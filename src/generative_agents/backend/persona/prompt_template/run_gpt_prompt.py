@@ -20,7 +20,9 @@ from generative_agents.backend.persona.prompt_template.gpt_structure import (
     generate_prompt,
     safe_generate_response,
 )
-from generative_agents.backend.persona.prompt_template.print_prompt import print_run_prompts
+from generative_agents.backend.persona.prompt_template.print_prompt import (
+    print_run_prompts,
+)
 
 
 def get_random_alphanumeric(i=6, j=6):
@@ -596,7 +598,7 @@ def run_gpt_prompt_action_sector(
             return False
         if "}" not in gpt_response:
             return False
-        return False if "," in gpt_response else True
+        return "," not in gpt_response
 
     def get_fail_safe():
         fs = "kitchen"

@@ -8,7 +8,9 @@ Description: An extra cognitive module for generating conversations.
 import datetime
 
 from generative_agents.backend.utils import debug
-from generative_agents.backend.persona.prompt_template.gpt_structure import get_embedding
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    get_embedding,
+)
 from generative_agents.backend.persona.cognitive_modules.retrieve import new_retrieve
 from generative_agents.backend.persona.prompt_template.run_gpt_prompt import (
     run_gpt_generate_iterative_chat_utt,
@@ -174,9 +176,7 @@ def agent_chat_v2(maze, init_persona, target_persona):
             target_persona, init_persona, retrieved
         )
         print("-------- relationshopadsjfhkalsdjf", relationship)
-        last_chat = ""
-        for i in curr_chat[-4:]:
-            last_chat += ": ".join(i) + "\n"
+        last_chat = "".join(": ".join(i) + "\n" for i in curr_chat[-4:])
         if last_chat:
             focal_points = [
                 f"{relationship}",

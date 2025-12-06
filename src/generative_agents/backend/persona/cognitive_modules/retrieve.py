@@ -8,7 +8,9 @@ Description: This defines the "Retrieve" module for generative agents.
 from numpy import dot
 from numpy.linalg import norm
 
-from generative_agents.backend.persona.prompt_template.gpt_structure import get_embedding
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    get_embedding,
+)
 
 
 def retrieve(persona, perceived):
@@ -30,9 +32,7 @@ def retrieve(persona, perceived):
     # We rerieve events and thoughts separately.
     retrieved = {}
     for event in perceived:
-        retrieved[event.description] = {}
-        retrieved[event.description]["curr_event"] = event
-
+        retrieved[event.description] = {"curr_event": event}
         relevant_events = persona.a_mem.retrieve_relevant_events(
             event.subject, event.predicate, event.object
         )
@@ -142,11 +142,7 @@ def extract_recency(persona, nodes):
     """
     recency_vals = [persona.scratch.recency_decay**i for i in range(1, len(nodes) + 1)]
 
-    recency_out = {}
-    for count, node in enumerate(nodes):
-        recency_out[node.node_id] = recency_vals[count]
-
-    return recency_out
+    return {node.node_id: recency_vals[count] for count, node in enumerate(nodes)}
 
 
 def extract_importance(persona, nodes):
@@ -162,11 +158,7 @@ def extract_importance(persona, nodes):
       importance_out: A dictionary whose keys are the node.node_id and whose
                       values are the float that represents the importance score.
     """
-    importance_out = {}
-    for node in nodes:
-        importance_out[node.node_id] = node.poignancy
-
-    return importance_out
+    return {node.node_id: node.poignancy for node in nodes}
 
 
 def extract_relevance(persona, nodes, focal_pt):

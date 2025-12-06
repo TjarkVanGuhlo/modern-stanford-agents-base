@@ -9,7 +9,9 @@ the term we used internally back in 2022, taking from our Social Simulacra
 paper.
 """
 
-from generative_agents.backend.persona.memory_structures.spatial_memory import MemoryTree
+from generative_agents.backend.persona.memory_structures.spatial_memory import (
+    MemoryTree,
+)
 from generative_agents.backend.persona.memory_structures.associative_memory import (
     AssociativeMemory,
 )
@@ -20,7 +22,9 @@ from generative_agents.backend.persona.cognitive_modules.retrieve import retriev
 from generative_agents.backend.persona.cognitive_modules.plan import plan
 from generative_agents.backend.persona.cognitive_modules.reflect import reflect
 from generative_agents.backend.persona.cognitive_modules.execute import execute
-from generative_agents.backend.persona.cognitive_modules.converse import open_convo_session
+from generative_agents.backend.persona.cognitive_modules.converse import (
+    open_convo_session,
+)
 
 
 class Persona:

@@ -61,19 +61,19 @@ def execute(persona, maze, personas, plan):
                 potential_1 = path_finder(
                     maze.collision_maze,
                     persona.scratch.curr_tile,
-                    potential_path[int(len(potential_path) / 2)],
+                    potential_path[len(potential_path) // 2],
                     collision_block_id,
                 )
                 potential_2 = path_finder(
                     maze.collision_maze,
                     persona.scratch.curr_tile,
-                    potential_path[int(len(potential_path) / 2) + 1],
+                    potential_path[len(potential_path) // 2 + 1],
                     collision_block_id,
                 )
                 target_tiles = (
-                    [potential_path[int(len(potential_path) / 2)]]
+                    [potential_path[len(potential_path) // 2]]
                     if len(potential_1) <= len(potential_2)
-                    else [potential_path[int(len(potential_path) / 2 + 1)]]
+                    else [potential_path[len(potential_path) // 2 + 1]]
                 )
         elif "<waiting>" in plan:
             # Executing interaction where the persona has decided to wait before
@@ -116,10 +116,7 @@ def execute(persona, maze, personas, plan):
         new_target_tiles = []
         for i in target_tiles:
             curr_event_set = maze.access_tile(i)["events"]
-            pass_curr_tile = False
-            for j in curr_event_set:
-                if j[0] in persona_name_set:
-                    pass_curr_tile = True
+            pass_curr_tile = any(j[0] in persona_name_set for j in curr_event_set)
             if not pass_curr_tile:
                 new_target_tiles += [i]
         if len(new_target_tiles) == 0:

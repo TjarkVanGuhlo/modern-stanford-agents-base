@@ -166,15 +166,12 @@ def generate_hourly_schedule(persona, wake_up_hour):
     # ['relaxing and watching TV', 1], ['going to bed', 1], ['sleeping', 2]]
     _n_m1_hourly_compressed = []
     prev = None
-    prev_count = 0
     for i in n_m1_activity:
         if i != prev:
-            prev_count = 1
-            _n_m1_hourly_compressed += [[i, prev_count]]
+            _n_m1_hourly_compressed += [[i, 1]]
             prev = i
-        else:
-            if _n_m1_hourly_compressed:
-                _n_m1_hourly_compressed[-1][1] += 1
+        elif _n_m1_hourly_compressed:
+            _n_m1_hourly_compressed[-1][1] += 1
 
     return [[task, duration * 60] for task, duration in _n_m1_hourly_compressed]
 
