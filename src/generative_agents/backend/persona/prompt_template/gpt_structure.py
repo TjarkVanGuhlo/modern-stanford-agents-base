@@ -6,6 +6,20 @@ Description: Wrapper functions for calling OpenAI APIs.
 """
 
 import json
+
+__all__ = [
+    "temp_sleep",
+    "ChatGPT_single_request",
+    "GPT4_request",
+    "ChatGPT_request",
+    "GPT4_safe_generate_response",
+    "ChatGPT_safe_generate_response",
+    "ChatGPT_safe_generate_response_OLD",
+    "GPT_request",
+    "generate_prompt",
+    "safe_generate_response",
+    "get_embedding",
+]
 import time
 from pathlib import Path
 

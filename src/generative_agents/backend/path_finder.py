@@ -8,6 +8,16 @@ Some of the functions are defunct.
 
 import numpy as np
 
+__all__ = [
+    "print_maze",
+    "path_finder_v1",
+    "path_finder_v2",
+    "path_finder",
+    "closest_coordinate",
+    "path_finder_2",
+    "path_finder_3",
+]
+
 
 def print_maze(maze):
     for row in maze:

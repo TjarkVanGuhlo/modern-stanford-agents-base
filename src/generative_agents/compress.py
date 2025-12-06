@@ -8,7 +8,10 @@ Description: Compresses a simulation for replay demos.
 import json
 import shutil
 
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.global_methods import (
+    create_folder_if_not_there,
+    find_filenames,
+)
 from generative_agents.backend.utils import fs_storage, ENVIRONMENT_DIR
 
 

@@ -8,8 +8,7 @@ memory that aids in grounding their behavior in the game world.
 
 import json
 
-from generative_agents.backend.utils import *
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.global_methods import check_if_file_exists
 
 
 class MemoryTree:

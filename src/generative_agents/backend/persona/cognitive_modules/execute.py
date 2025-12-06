@@ -7,9 +7,8 @@ Description: This defines the "Act" module for generative agents.
 
 import random
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.path_finder import *
-from generative_agents.backend.utils import *
+from generative_agents.backend.path_finder import path_finder
+from generative_agents.backend.utils import collision_block_id
 
 
 def execute(persona, maze, personas, plan):

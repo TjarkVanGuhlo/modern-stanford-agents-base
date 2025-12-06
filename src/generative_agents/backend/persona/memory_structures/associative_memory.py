@@ -11,8 +11,6 @@ agents paper.
 import datetime
 import json
 
-from generative_agents.backend.global_methods import *
-
 
 class ConceptNode:
     def __init__(

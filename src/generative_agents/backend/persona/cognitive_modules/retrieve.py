@@ -8,8 +8,7 @@ Description: This defines the "Retrieve" module for generative agents.
 from numpy import dot
 from numpy.linalg import norm
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.persona.prompt_template.gpt_structure import *
+from generative_agents.backend.persona.prompt_template.gpt_structure import get_embedding
 
 
 def retrieve(persona, perceived):

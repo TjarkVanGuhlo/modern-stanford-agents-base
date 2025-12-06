@@ -159,53 +159,36 @@ class TestModelConfig:
 class TestUtilsIntegration:
     """Test utils module integration with config."""
 
-    def test_utils_imports_from_config(self):
-        """Test that utils correctly imports models from config."""
-        # Mock the required environment variables
-        with patch.dict(
-            os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}
-        ):
-            import importlib
-            import generative_agents.backend.utils as utils
+    def test_config_module_has_models(self):
+        """Test that config module correctly provides model configuration."""
+        from generative_agents.backend.config import (
+            model_config,
+            MODEL_PERCEIVE,
+            MODEL_PLAN,
+            MODEL_REFLECT,
+        )
 
-            importlib.reload(utils)
+        # Check that models are available
+        assert MODEL_PERCEIVE is not None
+        assert MODEL_PLAN is not None
+        assert MODEL_REFLECT is not None
 
-            from generative_agents.backend.utils import (
-                MODEL_PERCEIVE,
-                MODEL_PLAN,
-                MODEL_REFLECT,
-                model_config,
-            )
+        # Check that model_config is available
+        assert model_config is not None
+        assert hasattr(model_config, "get_model_for_task")
 
-            # Check that models are imported
-            assert MODEL_PERCEIVE is not None
-            assert MODEL_PLAN is not None
-            assert MODEL_REFLECT is not None
+    def test_config_models_are_strings(self):
+        """Test that model constants are strings (model names)."""
+        from generative_agents.backend.config import (
+            MODEL_PLAN,
+            MODEL_REFLECT,
+            MODEL_RETRIEVE_EMBEDDING,
+        )
 
-            # Check that model_config is available
-            assert model_config is not None
-            assert hasattr(model_config, "get_model_for_task")
-
-    def test_utils_backward_compatibility(self):
-        """Test backward compatibility with existing code."""
-        with patch.dict(
-            os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}
-        ):
-            import importlib
-            import generative_agents.backend.utils as utils
-
-            importlib.reload(utils)
-
-            from generative_agents.backend.utils import (
-                MODEL_PLAN,
-                MODEL_REFLECT,
-                MODEL_RETRIEVE_EMBEDDING,
-            )
-
-            # These should still be strings (model names)
-            assert isinstance(MODEL_PLAN, str)
-            assert isinstance(MODEL_REFLECT, str)
-            assert isinstance(MODEL_RETRIEVE_EMBEDDING, str)
+        # These should be strings (model names)
+        assert isinstance(MODEL_PLAN, str)
+        assert isinstance(MODEL_REFLECT, str)
+        assert isinstance(MODEL_RETRIEVE_EMBEDDING, str)
 
 
 @pytest.fixture
@@ -226,45 +209,41 @@ def clean_modules():
 class TestGPTStructureIntegration:
     """Test gpt_structure module integration."""
 
-    def test_gpt_structure_imports_all_models(self, clean_modules):
-        """Test that gpt_structure imports all 6 cognitive models."""
+    def test_config_has_all_models(self, clean_modules):
+        """Test that config module has all 6 cognitive models."""
+        from generative_agents.backend.config import (
+            MODEL_PERCEIVE,
+            MODEL_RETRIEVE_EMBEDDING,
+            MODEL_PLAN,
+            MODEL_REFLECT,
+            MODEL_EXECUTE,
+            MODEL_CONVERSE,
+            model_config,
+        )
+
+        # Verify all models are strings
+        assert isinstance(MODEL_PERCEIVE, str)
+        assert isinstance(MODEL_RETRIEVE_EMBEDDING, str)
+        assert isinstance(MODEL_PLAN, str)
+        assert isinstance(MODEL_REFLECT, str)
+        assert isinstance(MODEL_EXECUTE, str)
+        assert isinstance(MODEL_CONVERSE, str)
+
+        # Verify model_config is available
+        assert model_config is not None
+
+    def test_gpt_functions_exist(self, clean_modules):
+        """Test that GPT functions exist in gpt_structure module."""
         with patch.dict(
             os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}
         ):
-            from generative_agents.backend.persona.prompt_template.gpt_structure import (
-                MODEL_PERCEIVE,
-                MODEL_RETRIEVE_EMBEDDING,
-                MODEL_PLAN,
-                MODEL_REFLECT,
-                MODEL_EXECUTE,
-                MODEL_CONVERSE,
-                model_config,
-            )
-
-            # Verify all models are imported and are strings
-            assert isinstance(MODEL_PERCEIVE, str)
-            assert isinstance(MODEL_RETRIEVE_EMBEDDING, str)
-            assert isinstance(MODEL_PLAN, str)
-            assert isinstance(MODEL_REFLECT, str)
-            assert isinstance(MODEL_EXECUTE, str)
-            assert isinstance(MODEL_CONVERSE, str)
-
-            # Verify model_config is available
-            assert model_config is not None
-
-    def test_gpt_functions_use_correct_models(self, clean_modules):
-        """Test that GPT functions use the appropriate cognitive models."""
-        with patch.dict(
-            os.environ, {"OPENAI_API_KEY": "test-key", "KEY_OWNER": "test-owner"}
-        ):
-            from generative_agents.backend.persona.prompt_template.gpt_structure import (
+            from generative_agents.backend.config import (
                 MODEL_PLAN,
                 MODEL_REFLECT,
             )
             import generative_agents.backend.persona.prompt_template.gpt_structure as gpt_structure
 
-            # Check that functions reference the correct models
-            # This verifies the models are available for use in the functions
+            # Check that functions exist
             assert hasattr(gpt_structure, "ChatGPT_request")
             assert hasattr(gpt_structure, "GPT4_request")
             assert hasattr(gpt_structure, "get_embedding")

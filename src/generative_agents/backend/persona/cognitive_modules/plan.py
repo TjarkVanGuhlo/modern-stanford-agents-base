@@ -9,10 +9,33 @@ import datetime
 import math
 import random
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.persona.prompt_template.run_gpt_prompt import *
-from generative_agents.backend.persona.cognitive_modules.retrieve import *
-from generative_agents.backend.persona.cognitive_modules.converse import *
+from generative_agents.backend.utils import debug
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    ChatGPT_single_request,
+    get_embedding,
+)
+from generative_agents.backend.persona.cognitive_modules.retrieve import new_retrieve
+from generative_agents.backend.persona.cognitive_modules.converse import (
+    agent_chat_v2,
+    generate_convo_summary,
+)
+from generative_agents.backend.persona.prompt_template.run_gpt_prompt import (
+    run_gpt_prompt_act_obj_desc,
+    run_gpt_prompt_act_obj_event_triple,
+    run_gpt_prompt_action_arena,
+    run_gpt_prompt_action_game_object,
+    run_gpt_prompt_action_sector,
+    run_gpt_prompt_daily_plan,
+    run_gpt_prompt_decide_to_react,
+    run_gpt_prompt_decide_to_talk,
+    run_gpt_prompt_event_triple,
+    run_gpt_prompt_generate_hourly_schedule,
+    run_gpt_prompt_new_decomp_schedule,
+    run_gpt_prompt_pronunciatio,
+    run_gpt_prompt_summarize_conversation,
+    run_gpt_prompt_task_decomp,
+    run_gpt_prompt_wake_up_hour,
+)
 
 ##############################################################################
 # CHAPTER 2: Generate

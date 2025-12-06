@@ -8,13 +8,19 @@ interface with the safe_generate_response function.
 
 import ast
 import datetime
+import json
 import random
 import re
 import string
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.persona.prompt_template.gpt_structure import *
-from generative_agents.backend.persona.prompt_template.print_prompt import *
+from generative_agents.backend.utils import debug
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    ChatGPT_safe_generate_response,
+    ChatGPT_safe_generate_response_OLD,
+    generate_prompt,
+    safe_generate_response,
+)
+from generative_agents.backend.persona.prompt_template.print_prompt import print_run_prompts
 
 
 def get_random_alphanumeric(i=6, j=6):

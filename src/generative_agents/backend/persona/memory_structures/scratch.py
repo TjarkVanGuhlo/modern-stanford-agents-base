@@ -8,7 +8,7 @@ Description: Defines the short-term memory module for generative agents.
 import datetime
 import json
 
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.global_methods import check_if_file_exists
 
 
 class Scratch:
