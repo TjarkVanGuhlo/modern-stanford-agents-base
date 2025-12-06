@@ -40,6 +40,24 @@ def get_random_alphanumeric(i=6, j=6):
     return "".join(random.choices(string.ascii_letters + string.digits, k=k))
 
 
+def normalize_and_select(output: str, accessible: list[str], fail_safe: str) -> str:
+    """
+    Normalize GPT output against accessible options with case-insensitive matching.
+
+    Trims and lowercases both the output and accessible options for comparison,
+    returning the original-cased accessible value on match. Falls back to a random
+    accessible option if available, otherwise returns the fail_safe.
+    """
+    normalized_output = output.strip().lower()
+    normalized_map = {item.lower(): item for item in accessible}
+
+    if normalized_output in normalized_map:
+        return normalized_map[normalized_output]
+    if accessible:
+        return random.choice(accessible)
+    return fail_safe
+
+
 ##############################################################################
 # CHAPTER 1: Run GPT Prompt
 ##############################################################################
@@ -756,16 +774,7 @@ def run_gpt_prompt_action_arena(
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
-
-    normalized_output = output.strip().lower()
-    normalized_arenas = {arena.lower(): arena for arena in accessible_arenas}
-    if normalized_output in normalized_arenas:
-        output = normalized_arenas[normalized_output]
-    elif accessible_arenas:
-        output = random.choice(accessible_arenas)
-    else:
-        output = fail_safe
-    print(output)
+    output = normalize_and_select(output, accessible_arenas, fail_safe)
 
     if debug or verbose:
         print_run_prompts(
@@ -823,15 +832,7 @@ def run_gpt_prompt_action_game_object(
     output = safe_generate_response(
         prompt, gpt_param, 5, fail_safe, __func_validate, __func_clean_up
     )
-
-    normalized_output = output.strip().lower()
-    normalized_objects = {obj.lower(): obj for obj in accessible_objects}
-    if normalized_output in normalized_objects:
-        output = normalized_objects[normalized_output]
-    elif accessible_objects:
-        output = random.choice(accessible_objects)
-    else:
-        output = fail_safe
+    output = normalize_and_select(output, accessible_objects, fail_safe)
 
     if debug or verbose:
         print_run_prompts(
