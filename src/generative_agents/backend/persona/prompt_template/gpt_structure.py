@@ -15,12 +15,12 @@ from openai import OpenAI
 # prompt_lib_file paths are relative to the backend directory (e.g., "persona/prompt_template/v2/...")
 _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
-from generative_agents.backend.utils import (
-    openai_api_key,
+from generative_agents.backend.config import (
     MODEL_RETRIEVE_EMBEDDING,
     MODEL_PLAN,
     MODEL_REFLECT,
 )
+from generative_agents.backend.utils import openai_api_key
 
 client = OpenAI(api_key=openai_api_key)
 

@@ -8,7 +8,9 @@ interface with the safe_generate_response function.
 
 import ast
 import datetime
+import random
 import re
+import string
 
 from generative_agents.backend.global_methods import *
 from generative_agents.backend.persona.prompt_template.gpt_structure import *

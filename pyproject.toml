@@ -27,4 +27,5 @@ packages = ["src/generative_agents"]
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "ty>=0.0.1a32",
 ]

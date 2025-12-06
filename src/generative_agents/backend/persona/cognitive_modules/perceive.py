@@ -5,6 +5,7 @@ File: perceive.py
 Description: This defines the "Perceive" module for generative agents.
 """
 
+import math
 from operator import itemgetter
 
 from generative_agents.backend.global_methods import *
