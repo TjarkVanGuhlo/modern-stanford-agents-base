@@ -6,6 +6,17 @@ Description: Wrapper functions for calling OpenAI APIs.
 """
 
 import json
+import time
+from pathlib import Path
+
+from openai import OpenAI
+
+from generative_agents.backend.config import (
+    MODEL_PLAN,
+    MODEL_REFLECT,
+    MODEL_RETRIEVE_EMBEDDING,
+)
+from generative_agents.backend.utils import openai_api_key
 
 __all__ = [
     "temp_sleep",
@@ -20,21 +31,10 @@ __all__ = [
     "safe_generate_response",
     "get_embedding",
 ]
-import time
-from pathlib import Path
-
-from openai import OpenAI
 
 # Get the backend directory for resolving prompt template paths
 # prompt_lib_file paths are relative to the backend directory (e.g., "persona/prompt_template/v2/...")
 _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
-
-from generative_agents.backend.config import (
-    MODEL_PLAN,
-    MODEL_REFLECT,
-    MODEL_RETRIEVE_EMBEDDING,
-)
-from generative_agents.backend.utils import openai_api_key
 
 client = OpenAI(api_key=openai_api_key)
 
@@ -270,7 +270,7 @@ def generate_prompt(curr_input, prompt_lib_file):
     RETURNS:
       a str prompt that will be sent to OpenAI's GPT server.
     """
-    if type(curr_input) == type("string"):
+    if isinstance(curr_input, str):
         curr_input = [curr_input]
     curr_input = [str(i) for i in curr_input]
 

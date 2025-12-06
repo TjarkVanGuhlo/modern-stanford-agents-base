@@ -864,7 +864,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
             __func_clean_up(gpt_response, prompt="")
             if len(gpt_response) == 0:
                 return False
-        except:
+        except Exception:
             return False
         return True
 
@@ -899,7 +899,7 @@ def run_gpt_prompt_pronunciatio(action_description, persona, verbose=False):
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -1042,7 +1042,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
     def __chat_func_validate(gpt_response, prompt=""):  ############
         try:
             gpt_response = __func_clean_up(gpt_response, prompt="")
-        except:
+        except Exception:
             return False
         return True
 
@@ -1075,7 +1075,7 @@ def run_gpt_prompt_act_obj_desc(act_game_object, act_desp, persona, verbose=Fals
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -1751,7 +1751,7 @@ def run_gpt_prompt_summarize_conversation(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 11")  ########
@@ -1783,7 +1783,7 @@ def run_gpt_prompt_summarize_conversation(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2015,7 +2015,7 @@ def run_gpt_prompt_event_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 7")  ########
@@ -2047,7 +2047,7 @@ def run_gpt_prompt_event_poignancy(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2104,7 +2104,7 @@ def run_gpt_prompt_thought_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 8")  ########
@@ -2136,7 +2136,7 @@ def run_gpt_prompt_thought_poignancy(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2193,7 +2193,7 @@ def run_gpt_prompt_chat_poignancy(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 9")  ########
@@ -2225,7 +2225,7 @@ def run_gpt_prompt_chat_poignancy(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2278,7 +2278,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 12")  ########
@@ -2310,7 +2310,7 @@ def run_gpt_prompt_focal_pt(persona, statements, n, test_input=None, verbose=Fal
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2434,7 +2434,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 17")  ########
@@ -2470,7 +2470,7 @@ def run_gpt_prompt_agent_chat_summarize_ideas(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2520,7 +2520,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 18")  ########
@@ -2552,7 +2552,7 @@ def run_gpt_prompt_agent_chat_summarize_relationship(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2712,7 +2712,7 @@ def run_gpt_prompt_agent_chat(
         True,
     )
     # print ("HERE END JULY 23 -- ----- ") ########
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -2768,7 +2768,7 @@ def run_gpt_prompt_summarize_ideas(
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 16")  ########
@@ -2802,7 +2802,7 @@ def run_gpt_prompt_summarize_ideas(
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 
@@ -3046,7 +3046,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
         try:
             __func_clean_up(gpt_response, prompt)
             return True
-        except:
+        except Exception:
             return False
 
     print("asdhfapsh8p9hfaiafdsi;ldfj as DEBUG 15")  ########
@@ -3078,7 +3078,7 @@ def run_gpt_prompt_memo_on_convo(persona, all_utt, test_input=None, verbose=Fals
         __chat_func_clean_up,
         True,
     )
-    if output != False:
+    if output:
         return output, [output, prompt, gpt_param, prompt_input, fail_safe]
     # ChatGPT Plugin ===========================================================
 

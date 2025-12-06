@@ -334,8 +334,6 @@ class Scratch:
         today_min_elapsed += self.curr_time.minute
         today_min_elapsed += advance
 
-        x = sum(duration for task, duration in self.f_daily_schedule)
-        x = sum(duration for task, duration in self.f_daily_schedule_hourly_org)
         # We then calculate the current index based on that.
         curr_index = 0
         elapsed = 0

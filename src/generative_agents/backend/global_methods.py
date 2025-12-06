@@ -174,10 +174,10 @@ def check_if_file_exists(curr_file):
       False if the file does not exist
     """
     try:
-        with open(curr_file) as f_analysis_file:
+        with open(curr_file):
             pass
         return True
-    except Exception:
+    except OSError:
         return False
 
 

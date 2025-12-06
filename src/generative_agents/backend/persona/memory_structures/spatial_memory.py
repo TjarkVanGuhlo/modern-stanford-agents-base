@@ -20,7 +20,7 @@ class MemoryTree:
     def print_tree(self):
         def _print_tree(tree, depth):
             dash = " >" * depth
-            if type(tree) == type([]):
+            if isinstance(tree, list):
                 if tree:
                     print(dash, tree)
                 return

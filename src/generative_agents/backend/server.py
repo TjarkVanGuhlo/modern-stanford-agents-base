@@ -188,7 +188,8 @@ class ReverieServer:
 
         # Save the personas.
         for persona_name, persona in self.personas.items():
-            save_folder = f"{self.sim_folder}/personas/{persona_name}/bootstrap_memory"  # TODO: Check if save_folder is used
+            save_folder = f"{self.sim_folder}/personas/{persona_name}/bootstrap_memory"
+            persona.save(save_folder)
 
     def start_path_tester_server(self):
         """
@@ -210,7 +211,7 @@ class ReverieServer:
             def _print_tree(tree, depth):
                 dash = " >" * depth
 
-                if type(tree) == type([]):
+                if isinstance(tree, list):
                     if tree:
                         print(dash, tree)
                     return

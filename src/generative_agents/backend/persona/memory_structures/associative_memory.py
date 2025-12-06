@@ -77,10 +77,7 @@ class AssociativeMemory:
             node_id = f"node_{str(count + 1)}"
             node_details = nodes_load[node_id]
 
-            node_count = node_details["node_count"]
-            type_count = node_details["type_count"]
             node_type = node_details["type"]
-            depth = node_details["depth"]
 
             created = datetime.datetime.strptime(
                 node_details["created"], "%Y-%m-%d %H:%M:%S"
