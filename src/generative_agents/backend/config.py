@@ -7,10 +7,15 @@ in the generative agents architecture, based on the paper:
 
 Model configuration is NOT a secret - these are just configuration choices
 that determine which OpenAI models to use for different cognitive tasks.
+
+Model Selection (December 2025):
+- GPT-5 family: Current flagship models (gpt-5, gpt-5-mini, gpt-5-nano)
+- GPT-4o family: Scheduled for API retirement in February 2026
+- text-embedding-3-large: Still the best embedding model available
 """
 
 import os
-from typing import Dict, Optional
+from typing import Dict
 
 
 class ModelConfig:
@@ -26,21 +31,21 @@ class ModelConfig:
     """
 
     # Default model configuration (balanced performance/cost)
-    PERCEIVE: str = "gpt-4o-mini"
+    PERCEIVE: str = "gpt-5-mini"
     RETRIEVE_EMBEDDING: str = "text-embedding-3-large"
-    PLAN: str = "gpt-4o"
-    REFLECT: str = "gpt-4o"
-    EXECUTE: str = "gpt-4o-mini"
-    CONVERSE: str = "gpt-4o"
+    PLAN: str = "gpt-5"
+    REFLECT: str = "gpt-5"
+    EXECUTE: str = "gpt-5-mini"
+    CONVERSE: str = "gpt-5"
 
     @classmethod
     def from_preset(cls, preset: str = "balanced") -> "ModelConfig":
         """Create a ModelConfig from a preset configuration.
 
         Available presets:
-        - 'performance': Maximum quality, uses gpt-4o for all tasks
-        - 'balanced': Mix of gpt-4o and gpt-4o-mini (default)
-        - 'economy': Cost-optimized, primarily uses gpt-4o-mini
+        - 'performance': Maximum quality, uses gpt-5 for all tasks
+        - 'balanced': Mix of gpt-5 and gpt-5-mini (default)
+        - 'economy': Cost-optimized, primarily uses gpt-5-mini and gpt-5-nano
 
         Args:
             preset: Name of the preset configuration
@@ -52,24 +57,26 @@ class ModelConfig:
 
         if preset == "performance":
             # Maximum quality for all cognitive functions
-            config.PERCEIVE = "gpt-4o"
+            config.PERCEIVE = "gpt-5"
             config.RETRIEVE_EMBEDDING = "text-embedding-3-large"
-            config.PLAN = "gpt-4o"
-            config.REFLECT = "gpt-4o"
-            config.EXECUTE = "gpt-4o"
-            config.CONVERSE = "gpt-4o"
+            config.PLAN = "gpt-5"
+            config.REFLECT = "gpt-5"
+            config.EXECUTE = "gpt-5"
+            config.CONVERSE = "gpt-5"
 
         elif preset == "economy":
             # Cost-optimized configuration
-            config.PERCEIVE = "gpt-4o-mini"
+            config.PERCEIVE = "gpt-5-nano"
             config.RETRIEVE_EMBEDDING = "text-embedding-3-small"
-            config.PLAN = "gpt-4o-mini"
-            config.REFLECT = "gpt-4o"  # Keep reflection high quality
-            config.EXECUTE = "gpt-4o-mini"
-            config.CONVERSE = "gpt-4o-mini"
+            config.PLAN = "gpt-5-mini"
+            config.REFLECT = "gpt-5-mini"
+            config.EXECUTE = "gpt-5-nano"
+            config.CONVERSE = "gpt-5-mini"
 
         elif preset != "balanced":
-            raise ValueError(f"Unknown preset: {preset}. Available: performance, balanced, economy")
+            raise ValueError(
+                f"Unknown preset: {preset}. Available: performance, balanced, economy"
+            )
 
         return config
 
@@ -96,8 +103,12 @@ class ModelConfig:
 
         # Override individual models if specified in environment
         model_attributes = [
-            "PERCEIVE", "RETRIEVE_EMBEDDING", "PLAN",
-            "REFLECT", "EXECUTE", "CONVERSE"
+            "PERCEIVE",
+            "RETRIEVE_EMBEDDING",
+            "PLAN",
+            "REFLECT",
+            "EXECUTE",
+            "CONVERSE",
         ]
 
         for attr in model_attributes:
@@ -121,21 +132,21 @@ class ModelConfig:
             return self.PLAN
 
         task_map = {
-            'perceive': self.PERCEIVE,
-            'perception': self.PERCEIVE,
-            'observe': self.PERCEIVE,
-            'plan': self.PLAN,
-            'planning': self.PLAN,
-            'reflect': self.REFLECT,
-            'reflection': self.REFLECT,
-            'execute': self.EXECUTE,
-            'execution': self.EXECUTE,
-            'converse': self.CONVERSE,
-            'conversation': self.CONVERSE,
-            'dialogue': self.CONVERSE,
-            'embed': self.RETRIEVE_EMBEDDING,
-            'embedding': self.RETRIEVE_EMBEDDING,
-            'retrieve': self.RETRIEVE_EMBEDDING
+            "perceive": self.PERCEIVE,
+            "perception": self.PERCEIVE,
+            "observe": self.PERCEIVE,
+            "plan": self.PLAN,
+            "planning": self.PLAN,
+            "reflect": self.REFLECT,
+            "reflection": self.REFLECT,
+            "execute": self.EXECUTE,
+            "execution": self.EXECUTE,
+            "converse": self.CONVERSE,
+            "conversation": self.CONVERSE,
+            "dialogue": self.CONVERSE,
+            "embed": self.RETRIEVE_EMBEDDING,
+            "embedding": self.RETRIEVE_EMBEDDING,
+            "retrieve": self.RETRIEVE_EMBEDDING,
         }
         return task_map.get(task_type.lower(), self.PLAN)  # Default to PLAN model
 
@@ -146,12 +157,12 @@ class ModelConfig:
             Dictionary of model configurations
         """
         return {
-            'perceive': self.PERCEIVE,
-            'retrieve_embedding': self.RETRIEVE_EMBEDDING,
-            'plan': self.PLAN,
-            'reflect': self.REFLECT,
-            'execute': self.EXECUTE,
-            'converse': self.CONVERSE
+            "perceive": self.PERCEIVE,
+            "retrieve_embedding": self.RETRIEVE_EMBEDDING,
+            "plan": self.PLAN,
+            "reflect": self.REFLECT,
+            "execute": self.EXECUTE,
+            "converse": self.CONVERSE,
         }
 
     def __str__(self) -> str:

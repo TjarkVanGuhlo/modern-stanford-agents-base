@@ -5,7 +5,6 @@ File: gpt_structure.py
 Description: Wrapper functions for calling OpenAI APIs.
 """
 import json
-import random
 import time
 from pathlib import Path
 
@@ -17,13 +16,9 @@ _BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 from generative_agents.backend.utils import (
     openai_api_key,
-    MODEL_PERCEIVE,
     MODEL_RETRIEVE_EMBEDDING,
     MODEL_PLAN,
     MODEL_REFLECT,
-    MODEL_EXECUTE,
-    MODEL_CONVERSE,
-    model_config,
 )
 
 client = OpenAI(api_key=openai_api_key)
@@ -209,34 +204,31 @@ def ChatGPT_safe_generate_response_OLD(prompt,
 # ###################[SECTION 2: ORIGINAL GPT-3 STRUCTURE] ###################
 # ============================================================================
 
-def GPT_request(prompt, gpt_parameter): 
+def GPT_request(prompt, gpt_parameter):
   """
   Given a prompt and a dictionary of GPT parameters, make a request to OpenAI
-  server and returns the response. 
+  server and returns the response.
   ARGS:
     prompt: a str prompt
-    gpt_parameter: a python dictionary with the keys indicating the names of  
-                   the parameter and the values indicating the parameter 
-                   values.   
-  RETURNS: 
-    a str of GPT-3's response. 
+    gpt_parameter: a python dictionary with the keys indicating the names of
+                   the parameter and the values indicating the parameter
+                   values.
+  RETURNS:
+    a str of GPT-3's response.
   """
   temp_sleep()
   try:
-    response = client.completions.create(
-      model=gpt_parameter["engine"],
-      prompt=prompt,
-      temperature=gpt_parameter["temperature"],
-      max_tokens=gpt_parameter["max_tokens"],
-      top_p=gpt_parameter["top_p"],
-      frequency_penalty=gpt_parameter["frequency_penalty"],
-      presence_penalty=gpt_parameter["presence_penalty"],
-      stream=gpt_parameter["stream"],
-      stop=gpt_parameter["stop"],
+    # Use chat completions API with configured model (ignores legacy 'engine' param)
+    # GPT-5 models: only support max_completion_tokens (not max_tokens),
+    # temperature=1 only, no stop/frequency_penalty/presence_penalty/top_p
+    response = client.chat.completions.create(
+      model=MODEL_PLAN,
+      messages=[{"role": "user", "content": prompt}],
+      max_completion_tokens=gpt_parameter.get("max_tokens", 150),
     )
-    return response.choices[0].text
-  except:
-    print ("TOKEN LIMIT EXCEEDED")
+    return response.choices[0].message.content
+  except Exception as e:
+    print(f"GPT_request ERROR: {e}")
     return "TOKEN LIMIT EXCEEDED"
 
 
@@ -299,25 +291,25 @@ def get_embedding(text, model=None):
 
 
 if __name__ == '__main__':
-  gpt_parameter = {"engine": "text-davinci-003", "max_tokens": 50, 
-                   "temperature": 0, "top_p": 1, "stream": False,
-                   "frequency_penalty": 0, "presence_penalty": 0, 
+  gpt_parameter = {"max_tokens": 50,
+                   "temperature": 0, "top_p": 1,
+                   "frequency_penalty": 0, "presence_penalty": 0,
                    "stop": ['"']}
   curr_input = ["driving to a friend's house"]
   prompt_lib_file = "prompt_template/test_prompt_July5.txt"
   prompt = generate_prompt(curr_input, prompt_lib_file)
 
-  def __func_validate(gpt_response): 
+  def __func_validate(gpt_response):
     if len(gpt_response.strip()) <= 1:
       return False
-    if len(gpt_response.strip().split(" ")) > 1: 
+    if len(gpt_response.strip().split(" ")) > 1:
       return False
     return True
   def __func_clean_up(gpt_response):
     cleaned_response = gpt_response.strip()
     return cleaned_response
 
-  output = safe_generate_response(prompt, 
+  output = safe_generate_response(prompt,
                                  gpt_parameter,
                                  5,
                                  "rest",
@@ -325,7 +317,7 @@ if __name__ == '__main__':
                                  __func_clean_up,
                                  True)
 
-  print (output)
+  print(output)
 
 
 
