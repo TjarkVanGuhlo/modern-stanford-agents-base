@@ -6,6 +6,20 @@ Description: Contains functions used throughout my projects.
 """
 
 import csv
+
+__all__ = [
+    "create_folder_if_not_there",
+    "write_list_of_list_to_csv",
+    "write_list_to_csv_line",
+    "read_file_to_list",
+    "read_file_to_set",
+    "get_row_len",
+    "check_if_file_exists",
+    "find_filenames",
+    "average",
+    "std",
+    "copyanything",
+]
 import os
 import numpy
 import shutil
@@ -160,10 +174,10 @@ def check_if_file_exists(curr_file):
       False if the file does not exist
     """
     try:
-        with open(curr_file) as f_analysis_file:
+        with open(curr_file):
             pass
         return True
-    except Exception:
+    except OSError:
         return False
 
 

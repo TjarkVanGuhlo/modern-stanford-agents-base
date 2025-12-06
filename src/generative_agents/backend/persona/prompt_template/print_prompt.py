@@ -5,9 +5,9 @@ File: print_prompt.py
 Description: For printing prompts when the setting for verbose is set to True.
 """
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.persona.prompt_template.gpt_structure import *
-from generative_agents.backend.utils import *
+__all__ = [
+    "print_run_prompts",
+]
 
 ##############################################################################
 #                    PERSONA Chapter 1: Prompt Structures                    #

@@ -9,18 +9,18 @@ the term we used internally back in 2022, taking from our Social Simulacra
 paper.
 """
 
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.persona.memory_structures.spatial_memory import MemoryTree
+from generative_agents.backend.persona.memory_structures.associative_memory import (
+    AssociativeMemory,
+)
+from generative_agents.backend.persona.memory_structures.scratch import Scratch
 
-from generative_agents.backend.persona.memory_structures.spatial_memory import *
-from generative_agents.backend.persona.memory_structures.associative_memory import *
-from generative_agents.backend.persona.memory_structures.scratch import *
-
-from generative_agents.backend.persona.cognitive_modules.perceive import *
-from generative_agents.backend.persona.cognitive_modules.retrieve import *
-from generative_agents.backend.persona.cognitive_modules.plan import *
-from generative_agents.backend.persona.cognitive_modules.reflect import *
-from generative_agents.backend.persona.cognitive_modules.execute import *
-from generative_agents.backend.persona.cognitive_modules.converse import *
+from generative_agents.backend.persona.cognitive_modules.perceive import perceive
+from generative_agents.backend.persona.cognitive_modules.retrieve import retrieve
+from generative_agents.backend.persona.cognitive_modules.plan import plan
+from generative_agents.backend.persona.cognitive_modules.reflect import reflect
+from generative_agents.backend.persona.cognitive_modules.execute import execute
+from generative_agents.backend.persona.cognitive_modules.converse import open_convo_session
 
 
 class Persona:

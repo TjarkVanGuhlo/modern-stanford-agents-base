@@ -9,9 +9,8 @@ world in a 2-dimensional matrix.
 import json
 import math
 
-
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.utils import *
+from generative_agents.backend.global_methods import read_file_to_list
+from generative_agents.backend.utils import env_matrix
 
 
 class Maze:

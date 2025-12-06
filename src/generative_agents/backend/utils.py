@@ -5,6 +5,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+__all__ = [
+    "PROJECT_ROOT",
+    "ENVIRONMENT_DIR",
+    "openai_api_key",
+    "key_owner",
+    "maze_assets_loc",
+    "env_matrix",
+    "env_visuals",
+    "fs_storage",
+    "fs_temp_storage",
+    "collision_block_id",
+    "debug",
+]
+
 
 def _find_project_root() -> Path:
     """Find the project root directory (contains pyproject.toml)."""
@@ -43,15 +57,6 @@ collision_block_id = "32125"
 
 # Import cognitive models from config (these are configuration, not secrets)
 # Re-export for backward compatibility
-from generative_agents.backend.config import (
-    MODEL_CONVERSE,
-    MODEL_EXECUTE,
-    MODEL_PERCEIVE,
-    MODEL_PLAN,
-    MODEL_REFLECT,
-    MODEL_RETRIEVE_EMBEDDING,
-    model_config,
-)
 
 # Verbose
 debug = True

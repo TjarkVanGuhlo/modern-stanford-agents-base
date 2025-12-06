@@ -7,9 +7,8 @@ Description: This defines the "Act" module for generative agents.
 
 import random
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.path_finder import *
-from generative_agents.backend.utils import *
+from generative_agents.backend.path_finder import path_finder
+from generative_agents.backend.utils import collision_block_id
 
 
 def execute(persona, maze, personas, plan):
@@ -122,7 +121,6 @@ def execute(persona, maze, personas, plan):
         # Now that we've identified the target tile, we find the shortest path to
         # one of the target tiles.
         curr_tile = persona.scratch.curr_tile
-        collision_maze = maze.collision_maze
         closest_target_tile = None
         path = None
         for i in target_tiles:

@@ -8,8 +8,7 @@ memory that aids in grounding their behavior in the game world.
 
 import json
 
-from generative_agents.backend.utils import *
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.global_methods import check_if_file_exists
 
 
 class MemoryTree:
@@ -21,7 +20,7 @@ class MemoryTree:
     def print_tree(self):
         def _print_tree(tree, depth):
             dash = " >" * depth
-            if type(tree) == type([]):
+            if isinstance(tree, list):
                 if tree:
                     print(dash, tree)
                 return

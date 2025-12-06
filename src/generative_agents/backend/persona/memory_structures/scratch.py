@@ -8,7 +8,7 @@ Description: Defines the short-term memory module for generative agents.
 import datetime
 import json
 
-from generative_agents.backend.global_methods import *
+from generative_agents.backend.global_methods import check_if_file_exists
 
 
 class Scratch:
@@ -334,8 +334,6 @@ class Scratch:
         today_min_elapsed += self.curr_time.minute
         today_min_elapsed += advance
 
-        x = sum(duration for task, duration in self.f_daily_schedule)
-        x = sum(duration for task, duration in self.f_daily_schedule_hourly_org)
         # We then calculate the current index based on that.
         curr_index = 0
         elapsed = 0

@@ -9,10 +9,32 @@ import datetime
 import math
 import random
 
-from generative_agents.backend.global_methods import *
-from generative_agents.backend.persona.prompt_template.run_gpt_prompt import *
-from generative_agents.backend.persona.cognitive_modules.retrieve import *
-from generative_agents.backend.persona.cognitive_modules.converse import *
+from generative_agents.backend.utils import debug
+from generative_agents.backend.persona.prompt_template.gpt_structure import (
+    ChatGPT_single_request,
+    get_embedding,
+)
+from generative_agents.backend.persona.cognitive_modules.retrieve import new_retrieve
+from generative_agents.backend.persona.cognitive_modules.converse import (
+    agent_chat_v2,
+    generate_convo_summary,
+)
+from generative_agents.backend.persona.prompt_template.run_gpt_prompt import (
+    run_gpt_prompt_act_obj_desc,
+    run_gpt_prompt_act_obj_event_triple,
+    run_gpt_prompt_action_arena,
+    run_gpt_prompt_action_game_object,
+    run_gpt_prompt_action_sector,
+    run_gpt_prompt_daily_plan,
+    run_gpt_prompt_decide_to_react,
+    run_gpt_prompt_decide_to_talk,
+    run_gpt_prompt_event_triple,
+    run_gpt_prompt_generate_hourly_schedule,
+    run_gpt_prompt_new_decomp_schedule,
+    run_gpt_prompt_pronunciatio,
+    run_gpt_prompt_task_decomp,
+    run_gpt_prompt_wake_up_hour,
+)
 
 ##############################################################################
 # CHAPTER 2: Generate
@@ -304,8 +326,6 @@ def generate_act_obj_event_triple(act_game_object, act_obj_desc, persona):
 
 
 def generate_convo(maze, init_persona, target_persona):
-    curr_loc = maze.access_tile(init_persona.scratch.curr_tile)
-
     # convo = run_gpt_prompt_create_conversation(init_persona, target_persona, curr_loc)[0]
     # convo = agent_chat_v1(maze, init_persona, target_persona)
     convo = agent_chat_v2(maze, init_persona, target_persona)
@@ -321,10 +341,6 @@ def generate_convo(maze, init_persona, target_persona):
     if debug:
         print("GNS FUNCTION: <generate_convo>")
     return convo, convo_length
-
-
-def generate_convo_summary(persona, convo):
-    return run_gpt_prompt_summarize_conversation(persona, convo)[0]
 
 
 def generate_decide_to_talk(init_persona, target_persona, retrieved):
@@ -406,9 +422,6 @@ def generate_new_decomp_schedule(
                 truncated_fin = True
         dur_sum += dur
         count += 1
-
-    persona_name = persona.name
-    main_act_dur = main_act_dur
 
     x = (
         truncated_act_dur[-1][0].split("(")[0].strip()
@@ -958,7 +971,6 @@ def _chat_react(maze, persona, focused_event, reaction_mode, personas):
     # and the persona who is the target. We get the persona instances here.
     init_persona = persona
     target_persona = personas[reaction_mode[9:].strip()]
-    curr_personas = [init_persona, target_persona]
 
     # Actually creating the conversation here.
     convo, duration_min = generate_convo(maze, init_persona, target_persona)

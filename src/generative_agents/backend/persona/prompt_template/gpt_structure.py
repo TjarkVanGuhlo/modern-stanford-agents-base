@@ -11,20 +11,30 @@ from pathlib import Path
 
 from openai import OpenAI
 
-# Get the backend directory for resolving prompt template paths
-# prompt_lib_file paths are relative to the backend directory (e.g., "persona/prompt_template/v2/...")
-_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
-
 from generative_agents.backend.config import (
-    MODEL_CONVERSE,
-    MODEL_EXECUTE,
-    MODEL_PERCEIVE,
     MODEL_PLAN,
     MODEL_REFLECT,
     MODEL_RETRIEVE_EMBEDDING,
-    model_config,
 )
 from generative_agents.backend.utils import openai_api_key
+
+__all__ = [
+    "temp_sleep",
+    "ChatGPT_single_request",
+    "GPT4_request",
+    "ChatGPT_request",
+    "GPT4_safe_generate_response",
+    "ChatGPT_safe_generate_response",
+    "ChatGPT_safe_generate_response_OLD",
+    "GPT_request",
+    "generate_prompt",
+    "safe_generate_response",
+    "get_embedding",
+]
+
+# Get the backend directory for resolving prompt template paths
+# prompt_lib_file paths are relative to the backend directory (e.g., "persona/prompt_template/v2/...")
+_BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 client = OpenAI(api_key=openai_api_key)
 
@@ -260,7 +270,7 @@ def generate_prompt(curr_input, prompt_lib_file):
     RETURNS:
       a str prompt that will be sent to OpenAI's GPT server.
     """
-    if type(curr_input) == type("string"):
+    if isinstance(curr_input, str):
         curr_input = [curr_input]
     curr_input = [str(i) for i in curr_input]
 
