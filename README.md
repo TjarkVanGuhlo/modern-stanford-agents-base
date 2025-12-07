@@ -57,7 +57,7 @@ The system uses different language models for various cognitive functions based 
 3. **Modify defaults** in `reverie/backend_server/config.py` for permanent changes.
 
 ### Step 2. Install Dependencies
-This project uses `uv` for dependency management. Requires Python 3.14.1+ (tested on Python 3.14.x).
+This project uses `uv` for dependency management. Requires Python 3.14+.
 
 ```bash
 uv sync
