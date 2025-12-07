@@ -191,7 +191,9 @@ def replay_persona_state(request, sim_code, step, persona_name):
 
     persona_name_underscore = persona_name
     persona_name = " ".join(persona_name.split("_"))
-    memory = os.path.join("storage", sim_code, "personas", persona_name, "bootstrap_memory")
+    memory = os.path.join(
+        "storage", sim_code, "personas", persona_name, "bootstrap_memory"
+    )
     if not os.path.exists(memory):
         memory = os.path.join(
             "compressed_storage", sim_code, "personas", persona_name, "bootstrap_memory"

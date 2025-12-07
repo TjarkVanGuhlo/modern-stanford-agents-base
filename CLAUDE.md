@@ -6,32 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a modernized Python 3.14+ implementation of "Generative Agents: Interactive Simulacra of Human Behavior" (Park et al., 2023). The system simulates believable human behaviors using LLM-powered agents that perceive, remember, plan, reflect, and interact in a 2D virtual world called Smallville.
 
-## Project Structure
+## Key Files
 
-```
-modern-stanford-agents-base/
-├── src/
-│   └── generative_agents/           # Main installable package
-│       ├── __init__.py
-│       ├── compress.py              # Simulation compression utility
-│       └── backend/                 # Core simulation engine
-│           ├── server.py            # Main simulation orchestrator (entry point)
-│           ├── config.py            # Model configuration
-│           ├── utils.py             # Path handling and utilities
-│           ├── maze.py              # World representation
-│           ├── path_finder.py       # A* pathfinding
-│           ├── global_methods.py    # Shared utility functions
-│           └── persona/             # Agent implementation
-│               ├── persona.py       # Main agent class
-│               ├── cognitive_modules/   # Perceive, Plan, Reflect, etc.
-│               ├── memory_structures/   # Associative, Spatial, Scratch
-│               └── prompt_template/     # LLM interface
-├── environment/
-│   └── frontend_server/             # Django web interface
-├── tests/                           # Test suite
-├── docs/plan/                       # Implementation plans
-└── pyproject.toml                   # Package configuration
-```
+- `src/generative_agents/backend/server.py` - Main simulation orchestrator and CLI entry point (`ReverieServer` class)
+- `src/generative_agents/backend/config.py` - Model configuration (`ModelConfig` class with presets)
+- `src/generative_agents/backend/persona/persona.py` - Main agent class (internally "Persona", publicly "GenerativeAgent")
+- `src/generative_agents/backend/persona/prompt_template/gpt_structure.py` - Central LLM API wrapper (mock this for testing)
+- `src/generative_agents/backend/persona/prompt_template/run_gpt_prompt.py` - Prompt templates for cognitive functions
+- `src/generative_agents/backend/persona/prompt_template/v3_ChatGPT/` - Current prompt template files (v1, v2 are legacy)
 
 ## Common Commands
 
@@ -91,8 +73,7 @@ Vulture is configured in `pyproject.toml` with ignore rules for TypedDict fields
 
 **Start Frontend Environment Server (Django):**
 ```bash
-cd environment/frontend_server
-uv run python manage.py runserver
+uv run python environment/frontend_server/manage.py runserver
 ```
 Visit http://localhost:8000/ to verify it's running.
 
@@ -143,7 +124,7 @@ The system implements a perceive-retrieve-plan-reflect-execute cycle for each ag
 **Memory Structures**:
 - **AssociativeMemory** (`backend/persona/memory_structures/associative_memory.py`): The "memory stream" from the paper. Stores ConceptNodes with embeddings, keywords, poignancy scores, and decay functions. Three types: events, thoughts, chats
 - **SpatialMemory** (`backend/persona/memory_structures/spatial_memory.py`): Hierarchical tree of world->sector->arena->game objects
-- **Scratch** (`backend/persona/memory_structures/scratch.py`): Transient state including current action, planned path, daily schedule
+- **Scratch** (`backend/persona/memory_structures/scratch.py`): Transient state including current action, planned path, daily schedule. Key hyperparameters: `vision_r` (perception radius, default 4), `att_bandwidth` (attention capacity, default 3), `retention` (memory recency, default 5), `importance_trigger_max` (reflection threshold, default 150)
 
 **Maze** (`src/generative_agents/backend/maze.py`):
 - 2D tile-based world representation loaded from Tiled map exports
@@ -281,7 +262,7 @@ start path tester mode                     # Enter pathfinding test mode
 - Python requires >= 3.14 (uses modern features like pattern matching where appropriate)
 - All LLM calls centralized in `gpt_structure.py` for easy mocking
 - Simulations are deterministic given the same seed and OpenAI API responses
-- Agents can perceive within a vision radius (default: 8 tiles)
+- Agents can perceive within a vision radius (default: 4 tiles, configurable via `scratch.vision_r`)
 - Memory retrieval uses embedding similarity + recency + importance weighting
 - Reflection is triggered when cumulative importance exceeds threshold (default: 150)
 - Path planning uses A* algorithm with collision avoidance
