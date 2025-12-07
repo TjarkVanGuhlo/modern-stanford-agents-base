@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a modernized Python 3.14.1+ implementation of "Generative Agents: Interactive Simulacra of Human Behavior" (Park et al., 2023). The system simulates believable human behaviors using LLM-powered agents that perceive, remember, plan, reflect, and interact in a 2D virtual world called Smallville.
+This is a modernized Python 3.14+ implementation of "Generative Agents: Interactive Simulacra of Human Behavior" (Park et al., 2023). The system simulates believable human behaviors using LLM-powered agents that perceive, remember, plan, reflect, and interact in a 2D virtual world called Smallville.
 
 ## Project Structure
 
@@ -278,7 +278,7 @@ start path tester mode                     # Enter pathfinding test mode
 
 ## Key Technical Details
 
-- Python requires >= 3.14.1 (uses modern features like pattern matching where appropriate)
+- Python requires >= 3.14 (uses modern features like pattern matching where appropriate)
 - All LLM calls centralized in `gpt_structure.py` for easy mocking
 - Simulations are deterministic given the same seed and OpenAI API responses
 - Agents can perceive within a vision radius (default: 8 tiles)
