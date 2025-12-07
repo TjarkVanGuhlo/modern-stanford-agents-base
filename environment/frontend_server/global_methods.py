@@ -224,5 +224,3 @@ def copyanything(src, dst):
             shutil.copy(src, dst)
         else:
             raise
-
-
