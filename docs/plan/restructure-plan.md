@@ -15,13 +15,13 @@ The project requires structural improvements in five key areas:
 
 | Phase | Issues | Priority |
 |-------|--------|----------|
-| Security | ~~#59~~, #60, #61 | Critical |
+| Security | ~~#59~~, ~~#60~~, #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
 | Code Quality | #66, #67, #68, #69, ~~#76~~, #77, #78, ~~#79~~ | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
 | User Experience | #80, #81 | Medium |
 
-Note: #59, #76, and #79 have been completed.
+Note: #59, #60, #76, and #79 have been completed.
 
 ---
 
@@ -47,22 +47,18 @@ These issues must be resolved before any deployment or public access.
 3. Control `DEBUG` via environment variable (default: False)
 4. Configure `ALLOWED_HOSTS` via environment variable
 
-### #60 - Add Input Validation to Django POST Endpoints
+### ~~#60 - Add Input Validation to Django POST Endpoints~~ (Completed)
 
-**Priority:** Critical
-**Effort:** Medium
-**Risk:** Path traversal and arbitrary file write vulnerabilities
+**Status:** Completed in PR #85
 
-**Affected Endpoints:**
-- `process_environment()` - writes to user-controlled paths
-- `path_tester_update()` - writes without validation
-- `update_environment()` - reads from user-controlled paths
-
-**Actions:**
-1. Create `validate_sim_code()` function with allowlist pattern
-2. Create `safe_storage_path()` function preventing path traversal
-3. Validate `step` is a non-negative integer
-4. Return HTTP 400 for invalid requests
+**Result:**
+- Created `translator/validation.py` module with security validation functions
+- Added `validate_sim_code()` with alphanumeric allowlist pattern (rejects `../`, `/`, special chars)
+- Added `safe_storage_path()` preventing path traversal with resolved path verification
+- Added `validate_step()` ensuring non-negative integers
+- Updated all three POST endpoints with proper validation and HTTP 400 responses
+- Added type hints to endpoint functions
+- Added 39 unit tests covering all validation edge cases
 
 ### #61 - Remove Legacy runtime.txt File
 
@@ -427,8 +423,8 @@ def main():
 ```
 Phase 1 (Critical - Do First)
 │
-├── #59 Fix Django security settings
-├── #60 Add input validation
+├── #59 Fix Django security settings [DONE]
+├── #60 Add input validation [DONE]
 └── #61 Remove runtime.txt
 │
 Phase 2 (Foundational Structure)

@@ -7,12 +7,20 @@ import datetime
 import json
 import os
 
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from global_methods import check_if_file_exists, find_filenames
+
+from .validation import (
+    ValidationError,
+    safe_storage_path,
+    validate_camera_data,
+    validate_environment_request,
+    validate_update_request,
+)
 
 
 def landing(request):
@@ -251,59 +259,76 @@ def path_tester(request):
 
 @csrf_exempt
 @require_POST
-def process_environment(request):
+def process_environment(request: HttpRequest) -> HttpResponse:
+    """Receive frontend visual world information and write to storage.
+
+    This endpoint receives environment state from the frontend and persists it
+    to the storage directory for the backend simulation server to read.
+
+    Args:
+        request: Django request containing JSON with step, sim_code, environment.
+
+    Returns:
+        HttpResponse with "received" on success, or HTTP 400 on validation failure.
     """
-    <FRONTEND to BACKEND>
-    This sends the frontend visual world information to the backend server.
-    It does this by writing the current environment representation to
-    "storage/environment.json" file.
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponse("Invalid JSON in request body", status=400)
 
-    ARGS:
-      request: Django request
-    RETURNS:
-      HttpResponse: string confirmation message.
-    """
-    # f_curr_sim_code = "temp_storage/curr_sim_code.json"
-    # with open(f_curr_sim_code) as json_file:
-    #   sim_code = json.load(json_file)["sim_code"]
+    try:
+        step, sim_code, environment = validate_environment_request(data)
+    except ValidationError as e:
+        field_info = f" ({e.field})" if e.field else ""
+        return HttpResponse(f"Validation error{field_info}: {e.message}", status=400)
 
-    data = json.loads(request.body)
-    step = data["step"]
-    sim_code = data["sim_code"]
-    environment = data["environment"]
+    # Build safe path preventing traversal attacks
+    output_path = safe_storage_path(sim_code, "environment", f"{step}.json")
+    if output_path is None:
+        return HttpResponse("Invalid path parameters", status=400)
 
-    with open(f"storage/{sim_code}/environment/{step}.json", "w") as outfile:
-        outfile.write(json.dumps(environment, indent=2))
+    # Ensure parent directory exists
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as outfile:
+        json.dump(environment, outfile, indent=2)
 
     return HttpResponse("received")
 
 
 @csrf_exempt
 @require_POST
-def update_environment(request):
+def update_environment(request: HttpRequest) -> HttpResponse:
+    """Send backend persona movement data to the frontend.
+
+    This endpoint reads movement data computed by the backend simulation
+    and returns it to the frontend for visualization.
+
+    Args:
+        request: Django request containing JSON with step and sim_code.
+
+    Returns:
+        JsonResponse with movement data, or HTTP 400 on validation failure.
     """
-    <BACKEND to FRONTEND>
-    This sends the backend computation of the persona behavior to the frontend
-    visual server.
-    It does this by reading the new movement information from
-    "storage/movement.json" file.
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponse("Invalid JSON in request body", status=400)
 
-    ARGS:
-      request: Django request
-    RETURNS:
-      HttpResponse
-    """
-    # f_curr_sim_code = "temp_storage/curr_sim_code.json"
-    # with open(f_curr_sim_code) as json_file:
-    #   sim_code = json.load(json_file)["sim_code"]
+    try:
+        step, sim_code = validate_update_request(data)
+    except ValidationError as e:
+        field_info = f" ({e.field})" if e.field else ""
+        return HttpResponse(f"Validation error{field_info}: {e.message}", status=400)
 
-    data = json.loads(request.body)
-    step = data["step"]
-    sim_code = data["sim_code"]
+    # Build safe path preventing traversal attacks
+    movement_path = safe_storage_path(sim_code, "movement", f"{step}.json")
+    if movement_path is None:
+        return HttpResponse("Invalid path parameters", status=400)
 
-    response_data = {"<step>": -1}
-    if check_if_file_exists(f"storage/{sim_code}/movement/{step}.json"):
-        with open(f"storage/{sim_code}/movement/{step}.json") as json_file:
+    response_data: dict = {"<step>": -1}
+    if movement_path.exists():
+        with open(movement_path) as json_file:
             response_data = json.load(json_file)
             response_data["<step>"] = step
 
@@ -312,20 +337,36 @@ def update_environment(request):
 
 @csrf_exempt
 @require_POST
-def path_tester_update(request):
-    """
-    Processing the path and saving it to path_tester_env.json temp storage for
-    conducting the path tester.
+def path_tester_update(request: HttpRequest) -> HttpResponse:
+    """Save camera position for path tester utility.
 
-    ARGS:
-      request: Django request
-    RETURNS:
-      HttpResponse: string confirmation message.
-    """
-    data = json.loads(request.body)
-    camera = data["camera"]
+    This endpoint receives camera/viewport data from the path tester frontend
+    and persists it to temp storage for the backend path testing utility.
 
-    with open("temp_storage/path_tester_env.json", "w") as outfile:
-        outfile.write(json.dumps(camera, indent=2))
+    Args:
+        request: Django request containing JSON with camera data.
+
+    Returns:
+        HttpResponse with "received" on success, or HTTP 400 on validation failure.
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return HttpResponse("Invalid JSON in request body", status=400)
+
+    try:
+        camera = validate_camera_data(data)
+    except ValidationError as e:
+        field_info = f" ({e.field})" if e.field else ""
+        return HttpResponse(f"Validation error{field_info}: {e.message}", status=400)
+
+    # Use fixed path in temp_storage (no user-controlled components)
+    from .validation import TEMP_STORAGE_ROOT
+
+    output_path = TEMP_STORAGE_ROOT / "path_tester_env.json"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w") as outfile:
+        json.dump(camera, outfile, indent=2)
 
     return HttpResponse("received")
