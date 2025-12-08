@@ -15,6 +15,7 @@ from django.views.decorators.http import require_POST
 from global_methods import check_if_file_exists, find_filenames
 
 from .validation import (
+    TEMP_STORAGE_ROOT,
     ValidationError,
     safe_storage_path,
     validate_camera_data,
@@ -361,8 +362,6 @@ def path_tester_update(request: HttpRequest) -> HttpResponse:
         return HttpResponse(f"Validation error{field_info}: {e.message}", status=400)
 
     # Use fixed path in temp_storage (no user-controlled components)
-    from .validation import TEMP_STORAGE_ROOT
-
     output_path = TEMP_STORAGE_ROOT / "path_tester_env.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
