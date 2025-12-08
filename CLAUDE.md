@@ -206,6 +206,22 @@ OPENAI_API_KEY=your-api-key-here
 KEY_OWNER=Your Name
 ```
 
+### Django Frontend Configuration
+
+For production deployments:
+```bash
+# Required for production (generate with: python -c "import secrets; print(secrets.token_urlsafe(50))")
+DJANGO_SECRET_KEY=your-generated-secret-key
+
+# Optional (defaults shown)
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+For local development, Django environment variables can be omitted. The `local.py` settings file provides sensible defaults including an auto-generated secret key.
+
+### Model Configuration
+
 Optional model configuration (see Model Configuration section above):
 ```bash
 MODEL_PRESET=balanced|performance|economy

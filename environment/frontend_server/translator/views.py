@@ -3,12 +3,15 @@ Author: Joon Sung Park (joonspk@stanford.edu)
 File: views.py
 """
 
-import os
-import json
-
 import datetime
-from django.shortcuts import render
+import json
+import os
+
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
 from global_methods import check_if_file_exists, find_filenames
 
 
@@ -246,6 +249,8 @@ def path_tester(request):
     return render(request, template, context)
 
 
+@csrf_exempt
+@require_POST
 def process_environment(request):
     """
     <FRONTEND to BACKEND>
@@ -273,6 +278,8 @@ def process_environment(request):
     return HttpResponse("received")
 
 
+@csrf_exempt
+@require_POST
 def update_environment(request):
     """
     <BACKEND to FRONTEND>
@@ -303,6 +310,8 @@ def update_environment(request):
     return JsonResponse(response_data)
 
 
+@csrf_exempt
+@require_POST
 def path_tester_update(request):
     """
     Processing the path and saving it to path_tester_env.json temp storage for
