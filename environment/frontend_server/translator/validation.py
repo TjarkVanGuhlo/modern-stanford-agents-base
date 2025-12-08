@@ -66,11 +66,13 @@ def validate_step(step: int | str) -> int | None:
         >>> validate_step("abc")
         None
     """
+    # Reject booleans explicitly (int(True) == 1, int(False) == 0)
+    if isinstance(step, bool):
+        return None
+
     try:
         step_int = int(step)
-        if step_int < 0:
-            return None
-        return step_int
+        return None if step_int < 0 else step_int
     except (ValueError, TypeError):
         return None
 
@@ -129,15 +131,12 @@ def safe_storage_path(
         resolved = path.resolve()
         root_resolved = root.resolve()
 
-        # Check the path starts with the root (prevent traversal)
-        if (
-            not str(resolved).startswith(str(root_resolved) + "/")
-            and resolved != root_resolved
-        ):
-            return None
+        # Check resolved path is under root (cross-platform, handles symlinks)
+        resolved.relative_to(root_resolved)
 
         return resolved
     except (OSError, ValueError):
+        # relative_to raises ValueError if path is not under root
         return None
 
 

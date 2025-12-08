@@ -115,6 +115,11 @@ class TestValidateStep:
         assert validate_step([]) is None
         assert validate_step({}) is None
 
+    def test_invalid_booleans(self):
+        """Booleans should be rejected (int(True)==1, int(False)==0)."""
+        assert validate_step(True) is None
+        assert validate_step(False) is None
+
 
 class TestSafeStoragePath:
     """Test safe_storage_path function."""
