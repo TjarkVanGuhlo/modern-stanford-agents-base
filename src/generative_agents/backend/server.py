@@ -109,18 +109,6 @@ class ReverieServer:
         # e.g., ["Isabella Rodriguez"] = (58, 39)
         self.personas_tile = {}
 
-        # # <persona_convo_match> is a dictionary that describes which of the two
-        # # personas are talking to each other. It takes a key of a persona's full
-        # # name, and value of another persona's full name who is talking to the
-        # # original persona.
-        # # e.g., dict["Isabella Rodriguez"] = ["Maria Lopez"]
-        # self.persona_convo_match = dict()
-        # # <persona_convo> contains the actual content of the conversations. It
-        # # takes as keys, a pair of persona names, and val of a string convo.
-        # # Note that the key pairs are *ordered alphabetically*.
-        # # e.g., dict[("Adam Abraham", "Zane Xu")] = "Adam: baba \n Zane:..."
-        # self.persona_convo = dict()
-
         # Loading in all personas.
         init_env_file = f"{self.sim_folder}/environment/{str(self.step)}.json"
         init_env = json.load(open(init_env_file))
