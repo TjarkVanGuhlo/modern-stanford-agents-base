@@ -4,18 +4,16 @@ This document outlines the comprehensive plan to restructure the modern-stanford
 
 ## Executive Summary
 
-The project requires structural improvements in five key areas:
-1. **Security** - Critical Django vulnerabilities need immediate attention
-2. **Structure** - Directory layout needs clarification and simplification
-3. **Code Quality** - Technical debt and maintenance issues
-4. **Testing** - Comprehensive test coverage is missing
-5. **User Experience** - CLI and developer tooling improvements
+The project requires structural improvements in four key areas:
+1. **Structure** - Directory layout needs clarification and simplification
+2. **Code Quality** - Technical debt and maintenance issues
+3. **Testing** - Comprehensive test coverage is missing
+4. **User Experience** - CLI and developer tooling improvements
 
 ## Current Issues Overview
 
 | Phase | Issues | Priority |
 |-------|--------|----------|
-| Security | #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
 | Code Quality | #66, #67, #68, #69, #77, #78 | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
@@ -23,25 +21,7 @@ The project requires structural improvements in five key areas:
 
 ---
 
-## Phase 1: Security (Critical)
-
-These issues must be resolved before any deployment or public access.
-
-### #61 - Remove Legacy runtime.txt File
-
-**Priority:** Low
-**Effort:** Minimal
-**Risk:** None
-
-**Problem:** `runtime.txt` specifies Python 3.9.12, conflicts with `pyproject.toml` requirement of >=3.14.2
-
-**Actions:**
-1. Delete `environment/frontend_server/runtime.txt`
-2. Delete `environment/frontend_server/Procfile` if unused
-
----
-
-## Phase 2: Structure (High Priority)
+## Phase 1: Structure (High Priority)
 
 These changes establish the foundation for long-term maintainability.
 
@@ -148,7 +128,7 @@ ASSETS_DIR = Path(os.getenv("GENERATIVE_AGENTS_ASSETS_DIR", PROJECT_ROOT / "asse
 
 ---
 
-## Phase 3: Code Quality (Medium Priority)
+## Phase 2: Code Quality (Medium Priority)
 
 These changes improve maintainability and developer experience.
 
@@ -251,7 +231,7 @@ prompt_template/
 
 ---
 
-## Phase 4: Testing (Medium Priority)
+## Phase 3: Testing (Medium Priority)
 
 These changes ensure reliability and enable confident refactoring.
 
@@ -308,7 +288,7 @@ These changes ensure reliability and enable confident refactoring.
 
 ---
 
-## Phase 5: User Experience (Medium Priority)
+## Phase 4: User Experience (Medium Priority)
 
 These changes improve the developer and researcher experience.
 
@@ -369,11 +349,7 @@ def main():
 ## Implementation Order
 
 ```
-Phase 1 (Critical - Do First)
-│
-└── #61 Remove runtime.txt
-│
-Phase 2 (Foundational Structure)
+Phase 1 (Foundational Structure)
 │
 ├── #62 Rename environment/ to web/
 │   │
@@ -383,7 +359,7 @@ Phase 2 (Foundational Structure)
 │       │
 │       └── #64 Remove duplicate global_methods.py
 │
-Phase 3 (Code Quality - Can parallelize)
+Phase 2 (Code Quality - Can parallelize)
 │
 ├── #77 Extract path tester to utility module
 ├── #78 Refactor __init__ with helper methods
@@ -393,7 +369,7 @@ Phase 3 (Code Quality - Can parallelize)
 │   │
 │   └── #68 Split run_gpt_prompt.py
 │
-Phase 4 (Testing)
+Phase 3 (Testing)
 │
 └── #73 Set up test infrastructure
     │
@@ -401,7 +377,7 @@ Phase 4 (Testing)
     ├── #71 Tests for memory structures
     └── #72 Tests for Django views
 │
-Phase 5 (User Experience)
+Phase 4 (User Experience)
 │
 ├── #80 Interactive simulation selection (questionary)
 │   │
