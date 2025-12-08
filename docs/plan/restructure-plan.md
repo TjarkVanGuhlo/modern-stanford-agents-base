@@ -15,50 +15,17 @@ The project requires structural improvements in five key areas:
 
 | Phase | Issues | Priority |
 |-------|--------|----------|
-| Security | ~~#59~~, ~~#60~~, #61 | Critical |
+| Security | #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
-| Code Quality | #66, #67, #68, #69, ~~#76~~, #77, #78, ~~#79~~ | Medium |
+| Code Quality | #66, #67, #68, #69, #77, #78 | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
 | User Experience | #80, #81 | Medium |
-
-Note: #59, #60, #76, and #79 have been completed.
 
 ---
 
 ## Phase 1: Security (Critical)
 
 These issues must be resolved before any deployment or public access.
-
-### #59 - Fix Django Security Vulnerabilities in Settings
-
-**Priority:** Critical
-**Effort:** Low
-**Risk:** High if not addressed
-
-**Problems:**
-- Hardcoded `SECRET_KEY` in `settings/base.py:23`
-- CSRF protection disabled (`settings/base.py:48`)
-- `DEBUG = True` always enabled
-- `ALLOWED_HOSTS = []` accepts any host
-
-**Actions:**
-1. Load `SECRET_KEY` from environment variable
-2. Enable CSRF middleware
-3. Control `DEBUG` via environment variable (default: False)
-4. Configure `ALLOWED_HOSTS` via environment variable
-
-### ~~#60 - Add Input Validation to Django POST Endpoints~~ (Completed)
-
-**Status:** Completed in PR #85
-
-**Result:**
-- Created `translator/validation.py` module with security validation functions
-- Added `validate_sim_code()` with alphanumeric allowlist pattern (rejects `../`, `/`, special chars)
-- Added `safe_storage_path()` preventing path traversal with resolved path verification
-- Added `validate_step()` ensuring non-negative integers
-- Updated all three POST endpoints with proper validation and HTTP 400 responses
-- Added type hints to endpoint functions
-- Added 39 unit tests covering all validation edge cases
 
 ### #61 - Remove Legacy runtime.txt File
 
@@ -185,17 +152,6 @@ ASSETS_DIR = Path(os.getenv("GENERATIVE_AGENTS_ASSETS_DIR", PROJECT_ROOT / "asse
 
 These changes improve maintainability and developer experience.
 
-### ~~#76 - Extract CLI Command Handlers from server.py to Commands Module~~ (Completed)
-
-**Status:** Completed in PR #82
-
-**Result:**
-- Created `commands/` module with registry pattern
-- Extracted 19 commands to dedicated modules (simulation.py, inspection.py, tools.py)
-- Reduced `open_server()` from 184 lines to 41 lines (78% reduction)
-- Added new `help` command with auto-generated documentation
-- Added 32 tests for command handlers
-
 ### #77 - Extract Path Tester to Separate Utility Module
 
 **Priority:** Medium
@@ -226,14 +182,6 @@ src/generative_agents/backend/
 - `_load_reverie_globals()` - Parse dates, create maze, set step counter
 - `_initialize_personas()` - Load personas from environment file
 - `_setup_frontend_signaling()` - Write temp files for frontend
-
-### ~~#79 - Remove Dead Code: Commented-out persona_convo Variables~~ (Completed)
-
-**Status:** Completed in PR #83
-
-**Result:**
-- Removed 12 lines of commented-out dead code for conversation tracking
-- Variables `persona_convo_match` and `persona_convo` were never used anywhere in the codebase
 
 ### #66 - Remove Debug Print Statements from Cognitive Modules
 
@@ -423,8 +371,6 @@ def main():
 ```
 Phase 1 (Critical - Do First)
 │
-├── #59 Fix Django security settings [DONE]
-├── #60 Add input validation [DONE]
 └── #61 Remove runtime.txt
 │
 Phase 2 (Foundational Structure)
@@ -439,10 +385,8 @@ Phase 2 (Foundational Structure)
 │
 Phase 3 (Code Quality - Can parallelize)
 │
-├── #76 Extract CLI command handlers to commands module
 ├── #77 Extract path tester to utility module
 ├── #78 Refactor __init__ with helper methods
-├── #79 Remove dead code (persona_convo)
 ├── #66 Remove debug prints
 ├── #69 Add production.py
 ├── #67 Clean up prompt templates
@@ -478,19 +422,19 @@ modern-stanford-agents-base/
 │       ├── config.py
 │       ├── server.py
 │       └── backend/
-│           ├── commands/               # NEW: CLI command handlers (#76)
+│           ├── commands/               # CLI command handlers
 │           │   ├── __init__.py         # Command registry and dispatcher
 │           │   ├── simulation.py       # run, save, fin, exit
 │           │   ├── inspection.py       # print commands
 │           │   └── tools.py            # call -- commands
-│           ├── tools/                  # NEW: Development utilities (#77)
+│           ├── tools/                  # Development utilities (#77)
 │           │   ├── __init__.py
 │           │   └── path_tester.py      # Path tester utility
 │           ├── persona/
 │           │   ├── cognitive_modules/
 │           │   ├── memory_structures/
 │           │   └── prompt_template/
-│           │       └── prompts/        # Split from run_gpt_prompt.py
+│           │       └── prompts/        # Split from run_gpt_prompt.py (#68)
 │           ├── maze.py
 │           ├── path_finder.py
 │           └── utils.py
@@ -501,7 +445,7 @@ modern-stanford-agents-base/
 │   │   ├── settings/
 │   │   │   ├── base.py
 │   │   │   ├── local.py
-│   │   │   └── production.py           # NEW
+│   │   │   └── production.py           # #69
 │   │   ├── urls.py
 │   │   └── wsgi.py
 │   ├── api/                            # Was: translator/
@@ -519,7 +463,7 @@ modern-stanford-agents-base/
 │   └── characters/
 │
 ├── tests/
-│   ├── conftest.py                     # NEW
+│   ├── conftest.py                     # #73
 │   ├── unit/
 │   │   ├── backend/
 │   │   │   ├── cognitive/
@@ -533,7 +477,7 @@ modern-stanford-agents-base/
 │
 ├── .github/
 │   └── workflows/
-│       └── test.yml                    # NEW
+│       └── test.yml                    # #73
 │
 ├── pyproject.toml
 ├── CLAUDE.md
@@ -556,13 +500,13 @@ modern-stanford-agents-base/
 
 ## Success Criteria
 
-- [ ] All security vulnerabilities addressed (#59, #60)
-- [ ] Clean project structure with clear separation of concerns
-- [ ] No duplicate code files
-- [ ] All paths configurable via environment variables
-- [ ] No debug print statements in production code
-- [ ] Test coverage > 50% for core modules
-- [ ] CI pipeline running on all PRs
+- [x] All security vulnerabilities addressed
+- [ ] Clean project structure with clear separation of concerns (#62, #63)
+- [ ] No duplicate code files (#64)
+- [ ] All paths configurable via environment variables (#65)
+- [ ] No debug print statements in production code (#66)
+- [ ] Test coverage > 50% for core modules (#70, #71, #72)
+- [ ] CI pipeline running on all PRs (#73)
 - [ ] Documentation updated to reflect new structure
 
 ---
