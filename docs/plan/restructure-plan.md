@@ -17,11 +17,11 @@ The project requires structural improvements in five key areas:
 |-------|--------|----------|
 | Security | ~~#59~~, #60, #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
-| Code Quality | #66, #67, #68, #69, #76, #77, #78, #79 | Medium |
+| Code Quality | #66, #67, #68, #69, ~~#76~~, #77, #78, #79 | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
 | User Experience | #80, #81 | Medium |
 
-Note: #59 has been completed.
+Note: #59 and #76 have been completed.
 
 ---
 
@@ -189,35 +189,16 @@ ASSETS_DIR = Path(os.getenv("GENERATIVE_AGENTS_ASSETS_DIR", PROJECT_ROOT / "asse
 
 These changes improve maintainability and developer experience.
 
-### #76 - Extract CLI Command Handlers from server.py to Commands Module
+### ~~#76 - Extract CLI Command Handlers from server.py to Commands Module~~ (Completed)
 
-**Priority:** High (within phase)
-**Effort:** Medium
-**Dependencies:** None
+**Status:** Completed in PR #82
 
-**Problem:** The `open_server()` method in `server.py` contains a 197-line if/elif chain with 17 different command handlers.
-
-**Current State:**
-- Method spans lines 425-609 (197 lines)
-- 17 different command patterns handled via if/elif chain
-- Commands include: run, save, fin, exit, print persona schedule, print tile event, call -- analysis, etc.
-
-**Target Structure:**
-```
-src/generative_agents/backend/
-├── server.py              # Slim ReverieServer class
-└── commands/
-    ├── __init__.py        # Command registry and dispatcher
-    ├── simulation.py      # run, save, fin, exit commands
-    ├── inspection.py      # print commands (persona, tile, time)
-    └── tools.py           # call -- commands (analysis, load history)
-```
-
-**Benefits:**
-- Each command handler isolated and testable
-- Adding new commands doesn't require modifying giant if/elif chain
-- Command registry can auto-generate help text
-- `open_server()` reduced to < 50 lines
+**Result:**
+- Created `commands/` module with registry pattern
+- Extracted 19 commands to dedicated modules (simulation.py, inspection.py, tools.py)
+- Reduced `open_server()` from 184 lines to 41 lines (78% reduction)
+- Added new `help` command with auto-generated documentation
+- Added 32 tests for command handlers
 
 ### #77 - Extract Path Tester to Separate Utility Module
 
