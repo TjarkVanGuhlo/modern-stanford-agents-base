@@ -25,7 +25,6 @@ import datetime
 import json
 import math
 import os
-import shutil
 import time
 import traceback
 from typing import Any
@@ -33,14 +32,10 @@ from typing import Any
 from generative_agents.backend.global_methods import (
     check_if_file_exists,
     copyanything,
-    read_file_to_list,
 )
-from generative_agents.backend.utils import fs_storage, fs_temp_storage, maze_assets_loc
 from generative_agents.backend.maze import Maze
 from generative_agents.backend.persona.persona import Persona
-from generative_agents.backend.persona.cognitive_modules.converse import (
-    load_history_via_whisper,
-)
+from generative_agents.backend.utils import fs_storage, fs_temp_storage
 
 
 ##############################################################################
@@ -426,183 +421,39 @@ class ReverieServer:
         """
         Open up an interactive terminal prompt that lets you run the simulation
         step by step and probe agent state.
-
-        INPUT
-          None
-        OUTPUT
-          None
         """
+        from generative_agents.backend.commands import CommandAction, dispatch
+
         print("Note: The agents in this simulation package are computational")
         print("constructs powered by generative agents architecture and LLM. We")
         print("clarify that these agents lack human-like agency, consciousness,")
         print("and independent decision-making.\n---")
+        print("Type 'help' for available commands.\n")
 
         while True:
-            sim_command = input("Enter option: ")
-            sim_command = sim_command.strip()
-            ret_str = ""
+            sim_command = input("Enter option: ").strip()
+            if not sim_command:
+                continue
 
             try:
-                if sim_command.lower() in ["f", "fin", "finish", "save and finish"]:
-                    # Finishes the simulation environment and saves the progress.
-                    # Example: fin
-                    self.save()
-                    break
+                result = dispatch(self, sim_command)
 
-                elif sim_command.lower() == "start path tester mode":
-                    # Starts the path tester and removes the currently forked sim files.
-                    # Note that once you start this mode, you need to exit out of the
-                    # session and restart in case you want to run something else.
-                    shutil.rmtree(self.sim_folder)
-                    self.start_path_tester_server()
+                if result is None:
+                    print(f"Unknown command: {sim_command}")
+                    print("Type 'help' for available commands.")
+                    continue
 
-                elif sim_command.lower() == "exit":
-                    # Finishes the simulation environment but does not save the progress
-                    # and erases all saved data from current simulation.
-                    # Example: exit
-                    shutil.rmtree(self.sim_folder)
-                    break
+                if result.output:
+                    print(result.output)
 
-                elif sim_command.lower() == "save":
-                    # Saves the current simulation progress.
-                    # Example: save
-                    self.save()
-
-                elif sim_command[:3].lower() == "run":
-                    # Runs the number of steps specified in the prompt.
-                    # Example: run 1000
-                    int_count = int(sim_command.split()[-1])
-                    self.start_server(int_count)
-
-                elif "print persona schedule" in sim_command[:22].lower():
-                    # Print the decomposed schedule of the persona specified in the
-                    # prompt.
-                    # Example: print persona schedule Isabella Rodriguez
-                    ret_str += self.personas[
-                        " ".join(sim_command.split()[-2:])
-                    ].scratch.get_str_daily_schedule_summary()
-
-                elif "print all persona schedule" in sim_command[:26].lower():
-                    # Print the decomposed schedule of all personas in the world.
-                    # Example: print all persona schedule
-                    for persona_name, persona in self.personas.items():
-                        ret_str += f"{persona_name}\n"
-                        ret_str += (
-                            f"{persona.scratch.get_str_daily_schedule_summary()}\n"
-                        )
-                        ret_str += "---\n"
-
-                elif "print hourly org persona schedule" in sim_command.lower():
-                    # Print the hourly schedule of the persona specified in the prompt.
-                    # This one shows the original, non-decomposed version of the
-                    # schedule.
-                    # Ex: print persona schedule Isabella Rodriguez
-                    ret_str += self.personas[
-                        " ".join(sim_command.split()[-2:])
-                    ].scratch.get_str_daily_schedule_hourly_org_summary()
-
-                elif "print persona current tile" in sim_command[:26].lower():
-                    # Print the x y tile coordinate of the persona specified in the
-                    # prompt.
-                    # Ex: print persona current tile Isabella Rodriguez
-                    ret_str += str(
-                        self.personas[
-                            " ".join(sim_command.split()[-2:])
-                        ].scratch.curr_tile
-                    )
-
-                elif "print persona chatting with buffer" in sim_command.lower():
-                    # Print the chatting with a buffer of the persona specified in the
-                    # prompt.
-                    # Ex: print persona chatting with buffer Isabella Rodriguez
-                    curr_persona = self.personas[" ".join(sim_command.split()[-2:])]
-                    for p_n, count in curr_persona.scratch.chatting_with_buffer.items():
-                        ret_str += f"{p_n}: {count}"
-
-                elif "print persona associative memory (event)" in sim_command.lower():
-                    # Print the associative memory (event) of the persona specified in
-                    # the prompt
-                    # Ex: print persona associative memory (event) Isabella Rodriguez
-                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
-                    ret_str += self.personas[
-                        " ".join(sim_command.split()[-2:])
-                    ].a_mem.get_str_seq_events()
-
-                elif (
-                    "print persona associative memory (thought)" in sim_command.lower()
-                ):
-                    # Print the associative memory (thought) of the persona specified in
-                    # the prompt
-                    # Ex: print persona associative memory (thought) Isabella Rodriguez
-                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
-                    ret_str += self.personas[
-                        " ".join(sim_command.split()[-2:])
-                    ].a_mem.get_str_seq_thoughts()
-
-                elif "print persona associative memory (chat)" in sim_command.lower():
-                    # Print the associative memory (chat) of the persona specified in
-                    # the prompt
-                    # Ex: print persona associative memory (chat) Isabella Rodriguez
-                    ret_str += f"{self.personas[' '.join(sim_command.split()[-2:])]}\n"
-                    ret_str += self.personas[
-                        " ".join(sim_command.split()[-2:])
-                    ].a_mem.get_str_seq_chats()
-
-                elif "print persona spatial memory" in sim_command.lower():
-                    # Print the spatial memory of the persona specified in the prompt
-                    # Ex: print persona spatial memory Isabella Rodriguez
-                    self.personas[" ".join(sim_command.split()[-2:])].s_mem.print_tree()
-
-                elif "print current time" in sim_command[:18].lower():
-                    # Print the current time of the world.
-                    # Ex: print current time
-                    ret_str += f"{self.curr_time.strftime('%B %d, %Y, %H:%M:%S')}\n"
-                    ret_str += f"steps: {self.step}"
-
-                elif "print tile event" in sim_command[:16].lower():
-                    # Print the tile events in the tile specified in the prompt
-                    # Ex: print tile event 50, 30
-                    coords = [int(i.strip()) for i in sim_command[16:].split(",")]
-                    coordinate = (coords[0], coords[1])
-                    for i in self.maze.access_tile(coordinate)["events"]:
-                        ret_str += f"{i}\n"
-
-                elif "print tile details" in sim_command.lower():
-                    # Print the tile details of the tile specified in the prompt
-                    # Ex: print tile event 50, 30
-                    coords = [int(i.strip()) for i in sim_command[18:].split(",")]
-                    coordinate = (coords[0], coords[1])
-                    for key, val in self.maze.access_tile(coordinate).items():
-                        ret_str += f"{key}: {val}\n"
-
-                elif "call -- analysis" in sim_command.lower():
-                    # Starts a stateless chat session with the agent. It does not save
-                    # anything to the agent's memory.
-                    # Ex: call -- analysis Isabella Rodriguez
-                    persona_name = sim_command[len("call -- analysis") :].strip()
-                    self.personas[persona_name].open_convo_session("analysis")
-
-                elif "call -- load history" in sim_command.lower():
-                    curr_file = (
-                        f"{maze_assets_loc}/"
-                        + sim_command[len("call -- load history") :].strip()
-                    )
-                    # call -- load history the_ville/agent_history_init_n3.csv
-
-                    rows = read_file_to_list(curr_file, header=True, strip_trail=True)[
-                        1
-                    ]
-                    clean_whispers = []
-                    for row in rows:
-                        agent_name = row[0].strip()
-                        whispers = row[1].split(";")
-                        whispers = [whisper.strip() for whisper in whispers]
-                        for whisper in whispers:
-                            clean_whispers += [[agent_name, whisper]]
-
-                    load_history_via_whisper(self.personas, clean_whispers)
-
-                print(ret_str)
+                match result.action:
+                    case CommandAction.EXIT_SAVE | CommandAction.EXIT_NO_SAVE:
+                        break
+                    case CommandAction.PATH_TESTER:
+                        self.start_path_tester_server()
+                        break
+                    case CommandAction.CONTINUE:
+                        pass
 
             except Exception:
                 traceback.print_exc()

@@ -4,20 +4,24 @@ This document outlines the comprehensive plan to restructure the modern-stanford
 
 ## Executive Summary
 
-The project requires structural improvements in four key areas:
+The project requires structural improvements in five key areas:
 1. **Security** - Critical Django vulnerabilities need immediate attention
 2. **Structure** - Directory layout needs clarification and simplification
 3. **Code Quality** - Technical debt and maintenance issues
 4. **Testing** - Comprehensive test coverage is missing
+5. **User Experience** - CLI and developer tooling improvements
 
 ## Current Issues Overview
 
 | Phase | Issues | Priority |
 |-------|--------|----------|
-| Security | #59, #60, #61 | Critical |
+| Security | ~~#59~~, #60, #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
-| Code Quality | #66, #67, #68, #69 | Medium |
+| Code Quality | #66, #67, #68, #69, ~~#76~~, #77, #78, #79 | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
+| User Experience | #80, #81 | Medium |
+
+Note: #59 and #76 have been completed.
 
 ---
 
@@ -185,6 +189,58 @@ ASSETS_DIR = Path(os.getenv("GENERATIVE_AGENTS_ASSETS_DIR", PROJECT_ROOT / "asse
 
 These changes improve maintainability and developer experience.
 
+### ~~#76 - Extract CLI Command Handlers from server.py to Commands Module~~ (Completed)
+
+**Status:** Completed in PR #82
+
+**Result:**
+- Created `commands/` module with registry pattern
+- Extracted 19 commands to dedicated modules (simulation.py, inspection.py, tools.py)
+- Reduced `open_server()` from 184 lines to 41 lines (78% reduction)
+- Added new `help` command with auto-generated documentation
+- Added 32 tests for command handlers
+
+### #77 - Extract Path Tester to Separate Utility Module
+
+**Priority:** Medium
+**Effort:** Low
+**Dependencies:** None
+
+**Problem:** `start_path_tester_server()` is a 96-line self-contained utility rarely used outside of map development.
+
+**Target Structure:**
+```
+src/generative_agents/backend/
+├── server.py              # ReverieServer without path tester
+└── tools/
+    ├── __init__.py
+    └── path_tester.py     # Standalone path tester
+```
+
+### #78 - Refactor ReverieServer.__init__ with Helper Methods
+
+**Priority:** Low
+**Effort:** Low
+**Dependencies:** None
+
+**Problem:** `__init__()` is 111 lines with multiple logical sections that could be clearer with helper methods.
+
+**Proposed Helper Methods:**
+- `_setup_simulation_fork()` - Copy fork folder, update meta.json
+- `_load_reverie_globals()` - Parse dates, create maze, set step counter
+- `_initialize_personas()` - Load personas from environment file
+- `_setup_frontend_signaling()` - Write temp files for frontend
+
+### #79 - Remove Dead Code: Commented-out persona_convo Variables
+
+**Priority:** Low
+**Effort:** Minimal
+**Dependencies:** None
+
+**Problem:** Lines 117-127 in `server.py` contain commented-out dead code for conversation tracking (`persona_convo_match`, `persona_convo`) that is never used anywhere in the codebase.
+
+**Action:** Remove the 11 lines of commented-out code.
+
 ### #66 - Remove Debug Print Statements from Cognitive Modules
 
 **Priority:** Medium
@@ -310,6 +366,64 @@ These changes ensure reliability and enable confident refactoring.
 
 ---
 
+## Phase 5: User Experience (Medium Priority)
+
+These changes improve the developer and researcher experience.
+
+### #80 - Improve CLI Startup UX with Interactive Simulation Selection
+
+**Priority:** High (within phase)
+**Effort:** Medium
+**Dependencies:** None
+
+**Problem:** Current CLI requires manually typing exact simulation names, which is error-prone and cumbersome.
+
+**Current State:**
+```python
+def main():
+    origin = input("Enter the name of the forked simulation: ").strip()
+    target = input("Enter the name of the new simulation: ").strip()
+```
+
+**Solution:** Use **questionary** (v2.1.1, actively maintained) for interactive selection:
+- Arrow key navigation through available simulations
+- Base simulations (`base_*`) shown separately from saved simulations
+- Metadata display (persona count, step count)
+- Type-ahead filtering
+- Auto-generated names with timestamps
+- CLI arguments for automation (`--fork`, `--name`, `--list`)
+
+**Library Choice:**
+| Library | Status | Decision |
+|---------|--------|----------|
+| questionary | v2.1.1 (Aug 2025) | **Selected** - lightweight, maintained |
+| Textual | v6.3.0 (Dec 2025) | Overkill for selection menu |
+| InquirerPy | 12+ months stale | Avoid |
+| simple-term-menu | 12+ months stale | Avoid |
+
+### #81 - Build Textual-based Simulation Dashboard
+
+**Priority:** Low
+**Effort:** High
+**Dependencies:** #80
+
+**Vision:** A rich terminal UI for real-time simulation monitoring:
+- Agent activity monitoring (current actions, locations, conversations)
+- Memory inspection (associative, spatial, scratch)
+- Interactive controls (pause, step, save, speed adjustment)
+- Log streaming with filtering
+
+**Library:** Textual (v6.3.0, Dec 2025, 32.7k GitHub stars, very actively maintained)
+
+**Features:**
+- Real-time simulation status display
+- Agent list with status indicators
+- Agent detail panel (location, action, plan, memories)
+- Keyboard shortcuts for common actions
+- Can deploy to web browser via textual-web
+
+---
+
 ## Implementation Order
 
 ```
@@ -331,6 +445,10 @@ Phase 2 (Foundational Structure)
 │
 Phase 3 (Code Quality - Can parallelize)
 │
+├── #76 Extract CLI command handlers to commands module
+├── #77 Extract path tester to utility module
+├── #78 Refactor __init__ with helper methods
+├── #79 Remove dead code (persona_convo)
 ├── #66 Remove debug prints
 ├── #69 Add production.py
 ├── #67 Clean up prompt templates
@@ -344,6 +462,12 @@ Phase 4 (Testing)
     ├── #70 Tests for cognitive modules
     ├── #71 Tests for memory structures
     └── #72 Tests for Django views
+│
+Phase 5 (User Experience)
+│
+├── #80 Interactive simulation selection (questionary)
+│   │
+│   └── #81 Textual simulation dashboard
 ```
 
 ---
@@ -360,6 +484,14 @@ modern-stanford-agents-base/
 │       ├── config.py
 │       ├── server.py
 │       └── backend/
+│           ├── commands/               # NEW: CLI command handlers (#76)
+│           │   ├── __init__.py         # Command registry and dispatcher
+│           │   ├── simulation.py       # run, save, fin, exit
+│           │   ├── inspection.py       # print commands
+│           │   └── tools.py            # call -- commands
+│           ├── tools/                  # NEW: Development utilities (#77)
+│           │   ├── __init__.py
+│           │   └── path_tester.py      # Path tester utility
 │           ├── persona/
 │           │   ├── cognitive_modules/
 │           │   ├── memory_structures/
