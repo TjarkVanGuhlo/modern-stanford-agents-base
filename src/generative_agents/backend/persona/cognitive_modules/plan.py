@@ -397,7 +397,6 @@ def generate_new_decomp_schedule(
     count = 0  # enumerate count
     truncated_fin = False
 
-    print("DEBUG::: ", persona.scratch.name)
     for act, dur in p.scratch.f_daily_schedule:
         if (dur_sum >= start_hour * 60) and (dur_sum < end_hour * 60):
             main_act_dur += [[act, dur]]
@@ -409,13 +408,7 @@ def generate_new_decomp_schedule(
                 truncated_act_dur += [
                     [p.scratch.f_daily_schedule[count][0], dur_sum - today_min_pass]
                 ]
-                truncated_act_dur[-1][-1] -= (
-                    dur_sum - today_min_pass
-                )  ######## DEC 7 DEBUG;.. is the +1 the right thing to do???
-                # truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass + 1) ######## DEC 7 DEBUG;.. is the +1 the right thing to do???
-                print("DEBUG::: ", truncated_act_dur)
-
-                # truncated_act_dur[-1][-1] -= (dur_sum - today_min_pass) ######## DEC 7 DEBUG;.. is the +1 the right thing to do???
+                truncated_act_dur[-1][-1] -= dur_sum - today_min_pass
                 truncated_fin = True
         dur_sum += dur
         count += 1
@@ -517,7 +510,6 @@ def revise_identity(persona):
 
     new_daily_req = ChatGPT_single_request(daily_req_prompt)
     new_daily_req = new_daily_req.replace("\n", " ")
-    print("WE ARE HERE!!!", new_daily_req)
     persona.scratch.daily_plan_req = new_daily_req
 
 
@@ -662,22 +654,12 @@ def _determine_action(persona, maze):
     # Generate an <Action> instance from the action description and duration. By
     # this point, we assume that all the relevant actions are decomposed and
     # ready in f_daily_schedule.
-    print("DEBUG LJSDLFSKJF")
-    for i in persona.scratch.f_daily_schedule:
-        print(i)
-    print(curr_index)
-    print(len(persona.scratch.f_daily_schedule))
-    print(persona.scratch.name)
-    print("------")
 
-    # 1440
+    # Calculate total scheduled minutes and pad to 1440 (24 hours) with sleep
     x_emergency = 0
     for i in persona.scratch.f_daily_schedule:
         x_emergency += i[1]
-    # print ("x_emergency", x_emergency)
 
-    if 1440 - x_emergency > 0:
-        print("x_emergency__AAA", x_emergency)
     persona.scratch.f_daily_schedule += [["sleeping", 1440 - x_emergency]]
 
     act_desp, act_dura = persona.scratch.f_daily_schedule[curr_index]

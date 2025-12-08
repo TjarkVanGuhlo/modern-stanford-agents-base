@@ -58,7 +58,7 @@ def generate_summarize_agent_relationship(init_persona, target_persona, retrieve
 def generate_agent_chat(
     maze, init_persona, target_persona, curr_context, init_summ_idea, target_summ_idea
 ):
-    summarized_idea = run_gpt_prompt_agent_chat(
+    return run_gpt_prompt_agent_chat(
         maze,
         init_persona,
         target_persona,
@@ -66,9 +66,6 @@ def generate_agent_chat(
         init_summ_idea,
         target_summ_idea,
     )[0]
-    for i in summarized_idea:
-        print(i)
-    return summarized_idea
 
 
 def agent_chat_v1(maze, init_persona, target_persona):
@@ -126,21 +123,15 @@ def generate_one_utterance(maze, init_persona, target_persona, retrieved, curr_c
         + f"{target_persona.scratch.name}."
     )
 
-    print("July 23 5")
     x = run_gpt_generate_iterative_chat_utt(
         maze, init_persona, target_persona, retrieved, curr_context, curr_chat
     )[0]
-
-    print("July 23 6")
-
-    print("adshfoa;khdf;fajslkfjald;sdfa HERE", x)
 
     return x["utterance"], x["end"]
 
 
 def agent_chat_v2(maze, init_persona, target_persona):
     curr_chat = []
-    print("July 23")
 
     for _ in range(8):
         focal_points = [f"{target_persona.scratch.name}"]
@@ -148,7 +139,6 @@ def agent_chat_v2(maze, init_persona, target_persona):
         relationship = generate_summarize_agent_relationship(
             init_persona, target_persona, retrieved
         )
-        print("-------- relationshopadsjfhkalsdjf", relationship)
         last_chat = "".join(": ".join(i) + "\n" for i in curr_chat[-4:])
         focal_points = [
             f"{relationship}",
@@ -170,7 +160,6 @@ def agent_chat_v2(maze, init_persona, target_persona):
         relationship = generate_summarize_agent_relationship(
             target_persona, init_persona, retrieved
         )
-        print("-------- relationshopadsjfhkalsdjf", relationship)
         last_chat = "".join(": ".join(i) + "\n" for i in curr_chat[-4:])
         focal_points = [
             f"{relationship}",
@@ -186,11 +175,6 @@ def agent_chat_v2(maze, init_persona, target_persona):
         curr_chat += [[target_persona.scratch.name, utt]]
         if end:
             break
-
-    print("July 23 PU")
-    for row in curr_chat:
-        print(row)
-    print("July 23 FIN")
 
     return curr_chat
 
