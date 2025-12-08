@@ -14,10 +14,12 @@ The project requires structural improvements in four key areas:
 
 | Phase | Issues | Priority |
 |-------|--------|----------|
-| Security | #59, #60, #61 | Critical |
+| Security | ~~#59~~, #60, #61 | Critical |
 | Structure | #62, #63, #64, #65 | High |
-| Code Quality | #66, #67, #68, #69 | Medium |
+| Code Quality | #66, #67, #68, #69, #76, #77, #78 | Medium |
 | Testing | #70, #71, #72, #73 | Medium |
+
+Note: #59 has been completed.
 
 ---
 
@@ -185,6 +187,67 @@ ASSETS_DIR = Path(os.getenv("GENERATIVE_AGENTS_ASSETS_DIR", PROJECT_ROOT / "asse
 
 These changes improve maintainability and developer experience.
 
+### #76 - Extract CLI Command Handlers from server.py to Commands Module
+
+**Priority:** High (within phase)
+**Effort:** Medium
+**Dependencies:** None
+
+**Problem:** The `open_server()` method in `server.py` contains a 197-line if/elif chain with 17 different command handlers.
+
+**Current State:**
+- Method spans lines 425-609 (197 lines)
+- 17 different command patterns handled via if/elif chain
+- Commands include: run, save, fin, exit, print persona schedule, print tile event, call -- analysis, etc.
+
+**Target Structure:**
+```
+src/generative_agents/backend/
+├── server.py              # Slim ReverieServer class
+└── commands/
+    ├── __init__.py        # Command registry and dispatcher
+    ├── simulation.py      # run, save, fin, exit commands
+    ├── inspection.py      # print commands (persona, tile, time)
+    └── tools.py           # call -- commands (analysis, load history)
+```
+
+**Benefits:**
+- Each command handler isolated and testable
+- Adding new commands doesn't require modifying giant if/elif chain
+- Command registry can auto-generate help text
+- `open_server()` reduced to < 50 lines
+
+### #77 - Extract Path Tester to Separate Utility Module
+
+**Priority:** Medium
+**Effort:** Low
+**Dependencies:** None
+
+**Problem:** `start_path_tester_server()` is a 96-line self-contained utility rarely used outside of map development.
+
+**Target Structure:**
+```
+src/generative_agents/backend/
+├── server.py              # ReverieServer without path tester
+└── tools/
+    ├── __init__.py
+    └── path_tester.py     # Standalone path tester
+```
+
+### #78 - Refactor ReverieServer.__init__ with Helper Methods
+
+**Priority:** Low
+**Effort:** Low
+**Dependencies:** None
+
+**Problem:** `__init__()` is 111 lines with multiple logical sections that could be clearer with helper methods.
+
+**Proposed Helper Methods:**
+- `_setup_simulation_fork()` - Copy fork folder, update meta.json
+- `_load_reverie_globals()` - Parse dates, create maze, set step counter
+- `_initialize_personas()` - Load personas from environment file
+- `_setup_frontend_signaling()` - Write temp files for frontend
+
 ### #66 - Remove Debug Print Statements from Cognitive Modules
 
 **Priority:** Medium
@@ -331,6 +394,9 @@ Phase 2 (Foundational Structure)
 │
 Phase 3 (Code Quality - Can parallelize)
 │
+├── #76 Extract CLI command handlers to commands module  ← NEW
+├── #77 Extract path tester to utility module            ← NEW
+├── #78 Refactor __init__ with helper methods            ← NEW
 ├── #66 Remove debug prints
 ├── #69 Add production.py
 ├── #67 Clean up prompt templates
@@ -360,6 +426,14 @@ modern-stanford-agents-base/
 │       ├── config.py
 │       ├── server.py
 │       └── backend/
+│           ├── commands/               # NEW: CLI command handlers (#76)
+│           │   ├── __init__.py         # Command registry and dispatcher
+│           │   ├── simulation.py       # run, save, fin, exit
+│           │   ├── inspection.py       # print commands
+│           │   └── tools.py            # call -- commands
+│           ├── tools/                  # NEW: Development utilities (#77)
+│           │   ├── __init__.py
+│           │   └── path_tester.py      # Path tester utility
 │           ├── persona/
 │           │   ├── cognitive_modules/
 │           │   ├── memory_structures/
