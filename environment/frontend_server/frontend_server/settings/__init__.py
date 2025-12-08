@@ -1,18 +1,15 @@
-###FOR PUSHING STATIC TO AWS
+"""
+Django settings initialization.
 
+Loading order:
+1. base.py - Core settings shared across all environments
+2. local.py - Development overrides (if present)
+3. production.py - Production settings (if local.py is absent)
 
-# from .base import *
-# from .production import *
+For production deployments, ensure DJANGO_SECRET_KEY is set.
+"""
 
-# try:
-#   from .local import *
-# except:
-# pass
-
-
-###FOR GENERAL USES
-
-# ruff: noqa: F403 - Star imports are idiomatic for Django settings
+# ruff: noqa: F403, F405 - Star imports are idiomatic for Django settings
 from .base import *
 
 try:
@@ -24,3 +21,10 @@ except ImportError:
 
 if live:
     from .production import *
+
+# Validate SECRET_KEY is set after all settings are loaded
+if not SECRET_KEY:
+    raise ValueError(
+        "DJANGO_SECRET_KEY environment variable is required. "
+        'Generate one with: python -c "import secrets; print(secrets.token_urlsafe(50))"'
+    )
